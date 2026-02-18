@@ -3,488 +3,453 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-
-  <!-- SEO: כרגע מוסתר מגוגל (noindex). אם אתה רוצה SEO מקצועי – תגיד לי ואחליף. -->
   <meta name="robots" content="noindex, nofollow" />
-
   <title>CODM Account Value Calculator</title>
 
   <style>
     :root{
-      --bg:#0b0d10;
-      --panel:#10141a;
-      --panel2:#0e1217;
-      --text:#e8eef6;
-      --muted:#a9b4c2;
-      --line:rgba(255,255,255,.08);
-      --accent:#22d3ee;      /* טורקיז עדין */
-      --good:#22c55e;        /* ירוק יתרה */
-      --mythic:#ef4444;      /* אדום */
-      --legendary:#f59e0b;   /* כתום-צהוב */
-      --epic:#a855f7;        /* סגול */
-      --danger:#fb7185;
-      --shadow: 0 10px 30px rgba(0,0,0,.45);
-      --radius:18px;
+      --bg:#070a10;
+      --text:#eaf2ff;
+      --muted:rgba(234,242,255,.68);
+
+      /* gamer neon */
+      --aqua:#27e6ff;
+      --aqua2:#18b7ff;
+      --green:#27ff72;
+      --red:#ff3b5c;
+      --orange:#ffb020;
+      --purple:#b06bff;
+
+      --soft: rgba(255,255,255,.06);
+      --soft2: rgba(255,255,255,.10);
     }
 
-    *{ box-sizing:border-box; }
-    html,body{ height:100%; }
+    *{box-sizing:border-box}
+    html,body{height:100%}
     body{
       margin:0;
       font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Arial, "Heebo", "Rubik", sans-serif;
-      background: radial-gradient(1200px 700px at 70% 10%, rgba(34,211,238,.08), transparent 55%),
-                  radial-gradient(900px 500px at 25% 85%, rgba(168,85,247,.06), transparent 60%),
-                  var(--bg);
       color:var(--text);
+      background:
+        radial-gradient(900px 520px at 70% 15%, rgba(39,230,255,.18), transparent 55%),
+        radial-gradient(900px 520px at 25% 85%, rgba(176,107,255,.13), transparent 58%),
+        radial-gradient(700px 420px at 50% 55%, rgba(39,255,114,.08), transparent 60%),
+        linear-gradient(180deg, #060914, #070a10 30%, #060914);
+      overflow-x:hidden;
       -webkit-font-smoothing:antialiased;
       -moz-osx-font-smoothing:grayscale;
     }
 
+    /* subtle animated glow */
+    .glow{
+      position:fixed;
+      inset:-30%;
+      background: radial-gradient(circle at 40% 40%, rgba(39,230,255,.08), transparent 55%),
+                  radial-gradient(circle at 60% 60%, rgba(39,255,114,.06), transparent 60%);
+      filter: blur(18px);
+      pointer-events:none;
+      animation: drift 10s ease-in-out infinite alternate;
+      z-index:-1;
+    }
+    @keyframes drift{
+      from{ transform: translate3d(-1.5%, -1%, 0) scale(1); opacity:.9; }
+      to{ transform: translate3d(1.5%, 1%, 0) scale(1.02); opacity:1; }
+    }
+
     .wrap{
       min-height:100%;
+      padding:18px 14px 30px;
       display:flex;
-      align-items:center;
       justify-content:center;
-      padding:22px 14px;
     }
-
     .app{
       width:min(980px, 100%);
-      display:grid;
-      grid-template-columns: 1fr;
-      gap:14px;
     }
 
-    /* Header money bar */
-    .topbar{
-      background: linear-gradient(180deg, rgba(255,255,255,.04), rgba(255,255,255,.02));
-      border:1px solid var(--line);
-      border-radius: var(--radius);
-      padding:14px 16px;
-      box-shadow: var(--shadow);
+    /* Top money (center, big, neon) */
+    .top{
       display:flex;
+      flex-direction:column;
       align-items:center;
-      justify-content:space-between;
-      gap:12px;
+      gap:8px;
+      padding:10px 0 4px;
     }
-
-    .brand{
-      display:flex;
-      flex-direction:column;
-      gap:2px;
-      min-width:0;
-    }
-    .brand b{
+    .title{
+      font-weight:900;
+      letter-spacing:.2px;
       font-size:14px;
-      letter-spacing:.2px;
-      color:rgba(255,255,255,.92);
-      white-space:nowrap;
-      overflow:hidden;
-      text-overflow:ellipsis;
-    }
-    .brand span{
-      font-size:12px;
-      color:var(--muted);
-      white-space:nowrap;
-      overflow:hidden;
-      text-overflow:ellipsis;
-    }
-
-    .moneyBox{
-      display:flex;
-      flex-direction:column;
-      align-items:flex-start;
-      gap:2px;
-      padding:10px 12px;
-      background: rgba(16,20,26,.65);
-      border:1px solid var(--line);
-      border-radius: 14px;
-    }
-    .moneyBox small{
-      color:rgba(255,255,255,.70);
-      font-size:12px;
-      letter-spacing:.2px;
+      color:rgba(234,242,255,.80);
+      text-align:center;
+      user-select:none;
     }
     .money{
       font-variant-numeric: tabular-nums;
-      font-size:28px;
-      line-height:1.1;
-      font-weight:800;
-      color:var(--good);
-      letter-spacing:.3px;
+      font-size:46px;
+      line-height:1.0;
+      font-weight:1000;
+      color:var(--green);
+      text-shadow:
+        0 0 16px rgba(39,255,114,.24),
+        0 0 40px rgba(39,255,114,.10);
+      text-align:center;
+      user-select:none;
+    }
+    .sub{
+      font-size:12px;
+      color:var(--muted);
+      text-align:center;
     }
 
-    /* Main card */
-    .card{
-      background: linear-gradient(180deg, rgba(255,255,255,.035), rgba(255,255,255,.015));
-      border:1px solid var(--line);
-      border-radius: var(--radius);
-      box-shadow: var(--shadow);
-      overflow:hidden;
-    }
-
-    .cardInner{
-      padding:18px 16px 14px;
+    /* Stage area (no boxes) */
+    .stage{
+      margin-top:14px;
+      padding:14px 0 0;
     }
 
     .welcome{
-      display:grid;
-      grid-template-columns: 1fr;
-      gap:12px;
+      text-align:center;
+      padding:18px 0 6px;
     }
     .welcome h1{
       margin:0;
-      font-size:22px;
+      font-size:26px;
       letter-spacing:.2px;
     }
     .welcome p{
-      margin:0;
+      margin:10px 0 0;
       color:var(--muted);
-      line-height:1.45;
+      line-height:1.55;
       font-size:14px;
     }
 
-    .primaryBtn{
+    .btn{
       appearance:none;
       border:none;
-      background: linear-gradient(180deg, rgba(34,211,238,.20), rgba(34,211,238,.10));
-      color:var(--text);
-      padding:14px 16px;
-      border-radius: 16px;
-      font-weight:800;
-      font-size:15px;
       cursor:pointer;
-      border:1px solid rgba(34,211,238,.28);
-      transition: transform .12s ease, background .2s ease;
+      font-weight:900;
+      padding:14px 16px;
+      border-radius: 18px;
       width:100%;
+      color:rgba(234,242,255,.95);
+      background: linear-gradient(180deg, rgba(39,230,255,.18), rgba(39,230,255,.08));
+      box-shadow: 0 12px 30px rgba(0,0,0,.35);
+      transition: transform .12s ease, filter .18s ease;
       touch-action:manipulation;
+      user-select:none;
     }
-    .primaryBtn:active{ transform: scale(.99); }
+    .btn:active{ transform: scale(.99); }
 
+    .btnRow{
+      margin-top:14px;
+      display:grid;
+      gap:10px;
+      justify-items:center;
+    }
+    .btnRow .btn{
+      max-width:420px;
+    }
+
+    /* Step */
     .step{
       display:none;
-      grid-template-columns: 1fr;
-      gap:12px;
-      animation: fadeUp .18s ease;
+      padding:10px 0 0;
+      animation: fadeUp .16s ease;
     }
-    .step.active{ display:grid; }
-
+    .step.active{ display:block; }
     @keyframes fadeUp{
-      from{ opacity:0; transform: translateY(6px); }
+      from{ opacity:0; transform: translateY(8px); }
       to{ opacity:1; transform: translateY(0); }
     }
 
-    .qTitle{
-      display:flex;
-      flex-direction:column;
-      gap:6px;
-    }
-    .qTitle h2{
-      margin:0;
-      font-size:18px;
+    .q{
+      text-align:center;
+      margin: 10px 0 6px;
+      font-weight:1000;
+      font-size:20px;
       letter-spacing:.2px;
     }
-    .qTitle .hintLine{
-      display:flex;
-      align-items:center;
-      justify-content:space-between;
-      gap:10px;
-      color:var(--muted);
-      font-size:13px;
-      min-height:18px;
-    }
 
-    .helpLink{
-      color:rgba(34,211,238,.95);
+    .help{
+      text-align:center;
+      margin:6px 0 0;
+      font-size:13px;
+    }
+    .help a{
+      color:rgba(39,230,255,.98);
       text-decoration:none;
-      font-weight:700;
-      cursor:pointer;
-      border-bottom:1px dashed rgba(34,211,238,.45);
+      font-weight:900;
+      border-bottom: 1px dashed rgba(39,230,255,.55);
       padding-bottom:1px;
     }
-    .helpLink:active{ opacity:.85; }
 
+    /* Choices */
     .choices2{
+      margin:14px auto 0;
+      max-width:520px;
       display:grid;
       grid-template-columns: 1fr 1fr;
-      gap:10px;
+      gap:12px;
     }
-    .choiceBtn{
+    .chip{
       appearance:none;
-      background: rgba(16,20,26,.55);
-      border:1px solid var(--line);
-      color:var(--text);
-      border-radius: 16px;
-      padding:16px 12px;
+      border:none;
       cursor:pointer;
-      font-weight:900;
-      font-size:14px;
-      transition: transform .10s ease, border-color .15s ease, background .15s ease;
+      border-radius: 18px;
+      padding:16px 14px;
+      font-weight:1000;
+      background: rgba(255,255,255,.06);
+      color: rgba(234,242,255,.92);
+      box-shadow: 0 12px 26px rgba(0,0,0,.28);
+      transition: transform .12s ease, filter .18s ease, background .18s ease;
       touch-action:manipulation;
-      min-height:56px;
+      user-select:none;
     }
-    .choiceBtn:active{ transform: scale(.99); }
-    .choiceBtn.selected{
-      border-color: rgba(34,211,238,.45);
-      background: rgba(34,211,238,.08);
+    .chip:active{ transform: scale(.99); }
+    .chip.selected{
+      background: linear-gradient(180deg, rgba(39,230,255,.20), rgba(39,230,255,.08));
+      filter: drop-shadow(0 0 16px rgba(39,230,255,.18));
     }
 
-    /* Numeric picker */
-    .numWrap{
-      background: rgba(16,20,26,.40);
-      border:1px solid var(--line);
-      border-radius: 16px;
-      padding:14px 12px;
+    /* Numeric area (minimal, no boxes) */
+    .numArea{
+      margin:14px auto 0;
+      max-width:560px;
       display:grid;
-      gap:10px;
+      gap:12px;
+      align-items:center;
+      justify-items:center;
+      padding: 6px 0;
     }
 
     .bigNum{
       display:flex;
-      align-items:baseline;
-      justify-content:center;
+      align-items:center;
       gap:10px;
-      padding:6px 0 2px;
+      justify-content:center;
       user-select:none;
     }
-    .bigNum .num{
-      font-size:44px;
-      line-height:1;
-      font-weight:900;
+    .bigNum .n{
+      font-size:56px;
+      font-weight:1100;
       font-variant-numeric: tabular-nums;
       letter-spacing:.6px;
+      line-height:1;
     }
     .bigNum .unit{
-      font-size:14px;
       color:var(--muted);
-      font-weight:700;
+      font-weight:900;
+      font-size:13px;
+      margin-top:8px;
     }
 
+    /* super clean input (select-all on focus handled in JS) */
     .numInput{
-      width:100%;
-      padding:12px 12px;
-      border-radius: 14px;
-      border:1px solid var(--line);
-      background: rgba(10,12,15,.35);
-      color:var(--text);
-      font-size:16px;
-      font-weight:800;
-      outline:none;
+      width:min(360px, 92vw);
+      padding:14px 16px;
+      border-radius: 18px;
+      border:1px solid rgba(255,255,255,.10);
+      background: rgba(255,255,255,.05);
+      color: rgba(234,242,255,.95);
+      font-size:18px;
+      font-weight:1000;
       text-align:center;
+      outline:none;
       -webkit-appearance:none;
       appearance:none;
     }
     .numInput:focus{
-      border-color: rgba(34,211,238,.45);
+      border-color: rgba(39,230,255,.40);
+      box-shadow: 0 0 0 3px rgba(39,230,255,.12);
     }
 
-    .sliderRow{
-      display:flex;
-      flex-direction:column;
+    .rangeWrap{
+      width:min(560px, 92vw);
+      display:grid;
       gap:8px;
-      padding:0 2px;
-    }
-    .sliderTop{
-      display:flex;
-      align-items:center;
-      justify-content:space-between;
-      gap:10px;
-      color:var(--muted);
-      font-size:12px;
-      font-weight:700;
     }
     .frac{
-      font-variant-numeric: tabular-nums;
-      color: rgba(255,255,255,.80);
+      display:flex;
+      justify-content:space-between;
+      font-size:12px;
+      color:var(--muted);
+      font-weight:900;
     }
-
     input[type="range"]{
       width:100%;
-      accent-color: var(--accent);
-      height: 28px;
+      height: 30px;
       background: transparent;
       margin: 0;
+      accent-color: var(--aqua);
+      touch-action: pan-x;
     }
 
-    /* Progress bar (filled) */
-    .pbar{
+    .bar{
       height:10px;
-      width:100%;
-      background: rgba(255,255,255,.06);
-      border:1px solid var(--line);
-      border-radius: 999px;
+      border-radius:999px;
+      background: rgba(255,255,255,.08);
       overflow:hidden;
     }
-    .pfill{
+    .fill{
       height:100%;
       width:0%;
-      background: linear-gradient(90deg, rgba(34,211,238,.55), rgba(34,211,238,.20));
       border-radius:999px;
+      background: linear-gradient(90deg, rgba(39,230,255,.55), rgba(39,230,255,.18));
       transition: width .12s linear;
     }
 
-    /* Footer buttons */
-    .navRow{
+    /* nav */
+    .nav{
+      margin:18px auto 0;
+      max-width:560px;
       display:flex;
-      gap:10px;
-      margin-top: 10px;
+      gap:12px;
     }
-    .navBtn{
+    .nav button{
       flex:1;
       appearance:none;
-      border-radius: 16px;
-      padding:14px 12px;
-      border:1px solid var(--line);
-      background: rgba(16,20,26,.50);
-      color: rgba(255,255,255,.92);
-      font-weight:900;
+      border:none;
+      border-radius: 18px;
+      padding:14px 14px;
+      font-weight:1000;
       cursor:pointer;
+      background: rgba(255,255,255,.06);
+      color: rgba(234,242,255,.92);
+      box-shadow: 0 10px 24px rgba(0,0,0,.25);
       touch-action:manipulation;
-      transition: transform .10s ease, border-color .15s ease;
+      user-select:none;
     }
-    .navBtn:active{ transform: scale(.99); }
-    .navBtn.primary{
-      border-color: rgba(34,211,238,.35);
-      background: rgba(34,211,238,.10);
+    .nav button.primary{
+      background: linear-gradient(180deg, rgba(39,230,255,.18), rgba(39,230,255,.08));
     }
-    .navBtn:disabled{
-      opacity:.45;
-      cursor:not-allowed;
+    .nav button:disabled{ opacity:.45; cursor:not-allowed; }
+
+    /* rarity colors */
+    .mythic{ color: var(--red); text-shadow: 0 0 14px rgba(255,59,92,.18); }
+    .legendary{ color: var(--orange); text-shadow: 0 0 14px rgba(255,176,32,.16); }
+    .epic{ color: var(--purple); text-shadow: 0 0 14px rgba(176,107,255,.16); }
+    .neg{ color: var(--red); }
+
+    /* CP coin tiny icon */
+    .coin{
+      width:16px;
+      height:16px;
+      object-fit:contain;
+      margin-inline:6px;
+      transform: translateY(2px);
+      filter: drop-shadow(0 0 10px rgba(39,230,255,.20));
+      user-select:none;
+      pointer-events:none;
     }
 
     /* Modal */
-    .modalOverlay{
+    .overlay{
       position:fixed;
       inset:0;
-      background: rgba(0,0,0,.62);
+      background: rgba(0,0,0,.58);
       display:none;
       align-items:center;
       justify-content:center;
       padding:18px 14px;
       z-index:999;
     }
-    .modalOverlay.show{ display:flex; }
+    .overlay.show{ display:flex; }
     .modal{
       width:min(560px, 100%);
-      background: rgba(16,20,26,.92);
-      border:1px solid var(--line);
+      background: rgba(8,12,20,.82);
+      border:1px solid rgba(255,255,255,.10);
       border-radius: 18px;
-      box-shadow: 0 20px 50px rgba(0,0,0,.65);
+      box-shadow: 0 20px 60px rgba(0,0,0,.55);
       overflow:hidden;
+      backdrop-filter: blur(10px);
     }
-    .modalHeader{
+    .mHead{
+      padding:14px 14px;
       display:flex;
       align-items:center;
       justify-content:space-between;
       gap:12px;
-      padding:14px 14px;
-      border-bottom:1px solid var(--line);
     }
-    .modalHeader b{
-      font-size:14px;
-      letter-spacing:.2px;
-    }
-    .xBtn{
-      width:42px;
-      height:42px;
-      border-radius: 14px;
-      border:1px solid var(--line);
-      background: rgba(255,255,255,.03);
+    .mHead b{ font-size:14px; letter-spacing:.2px; }
+    .x{
+      width:44px; height:44px;
+      border-radius: 16px;
+      border:none;
+      background: rgba(255,255,255,.06);
       cursor:pointer;
-      display:grid;
-      place-items:center;
+      display:grid; place-items:center;
       touch-action:manipulation;
     }
-    .xBtn:active{ transform: scale(.99); }
-    .modalBody{
-      padding:14px 14px 16px;
-      color: rgba(255,255,255,.84);
+    .x:active{ transform: scale(.99); }
+    .mBody{
+      padding:0 14px 16px;
+      color: rgba(234,242,255,.86);
       line-height:1.55;
       font-size:14px;
       white-space:pre-line;
     }
 
-    /* Rarity coloring (numbers only) */
-    .rar-mythic{ color: var(--mythic); }
-    .rar-legendary{ color: var(--legendary); }
-    .rar-epic{ color: var(--epic); }
-
     @media (min-width: 760px){
-      .app{ gap:16px; }
-      .cardInner{ padding:20px 18px 16px; }
-      .money{ font-size:30px; }
-      .welcome h1{ font-size:24px; }
+      .money{ font-size:54px; }
+      .welcome h1{ font-size:30px; }
     }
   </style>
 </head>
 
 <body>
+  <div class="glow"></div>
+
   <div class="wrap">
     <div class="app">
 
-      <div class="topbar">
-        <div class="brand">
-          <b>מחשבון call of duty</b>
-          <span>החישוב מתבצע על פי השקעת החשבון</span>
-        </div>
-
-        <div class="moneyBox" aria-live="polite">
-          <small>שווי השקעה בחשבון</small>
-          <div class="money" id="moneyDisplay">0.00₪</div>
-        </div>
+      <div class="top">
+        <div class="title">שווי השקעה בחשבון</div>
+        <div class="money" id="moneyDisplay">0.00₪</div>
+        <div class="sub">הסכום מתעדכן בזמן אמת לפי הבחירות שלך</div>
       </div>
 
-      <div class="card">
-        <div class="cardInner">
+      <div class="stage">
 
-          <!-- WELCOME -->
-          <section class="welcome" id="welcome">
-            <h1>ברוך הבא</h1>
-            <p>
-              נחשב את שווי ההשקעה וערך החשבון ונתן לכם שווי חשבון למכירה 
-            </p>
-            <button class="primaryBtn" id="startBtn">באו נתחיל לחשב</button>
-          </section>
+        <section class="welcome" id="welcome">
+          <h1>CODM Account Value</h1>
+          <p>מחשבון גיימינג נקי — שאלה אחת בכל פעם. בלי בלגן, בלי טפסים מכוערים.</p>
+          <div class="btnRow">
+            <button class="btn" id="startBtn">התחל חישוב חשבון</button>
+          </div>
+        </section>
 
-          <!-- STEPS CONTAINER -->
-          <section id="stepsHost"></section>
+        <section id="stepsHost"></section>
 
-        </div>
       </div>
-
     </div>
   </div>
 
   <!-- MODAL -->
-  <div class="modalOverlay" id="modalOverlay" role="dialog" aria-modal="true" aria-hidden="true">
+  <div class="overlay" id="overlay" role="dialog" aria-modal="true" aria-hidden="true">
     <div class="modal" role="document">
-      <div class="modalHeader">
-        <b id="modalTitle">מידע</b>
-        <button class="xBtn" id="modalClose" aria-label="סגור חלון">
-          <!-- SVG only -->
+      <div class="mHead">
+        <b id="mTitle">מידע</b>
+        <button class="x" id="mClose" aria-label="סגור">
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true">
-            <path d="M6 6l12 12M18 6L6 18" stroke="rgba(255,255,255,.88)" stroke-width="2.4" stroke-linecap="round"/>
+            <path d="M6 6l12 12M18 6L6 18" stroke="rgba(234,242,255,.92)" stroke-width="2.4" stroke-linecap="round"/>
           </svg>
         </button>
       </div>
-      <div class="modalBody" id="modalBody"></div>
+      <div class="mBody" id="mBody"></div>
     </div>
   </div>
 
   <script>
     /*****************************************************************
-     * IMPORTANT:
-     * כל ערכי המחירים/מגבלות מרוכזים כאן כדי שתוכל לשנות בקלות.
+     *  כל הערכים לשינוי נמצאים כאן (מחירים/מגבלות)
      *****************************************************************/
 
-    // סוגי חשבון
-    const ACCOUNT = {
-      DISCOUNT: "discount",
-      REGULAR: "regular"
-    };
+    const STORAGE_KEY = "codm_value_calc_v2";
 
-    // מחירים לפי סוג חשבון
-    // (כאן משנים ערכים – זה המקום המרכזי)
+    const ACCOUNT = { DISCOUNT:"discount", REGULAR:"regular" };
+
+    // שווי CP: 3.24 אגורות = 0.0324₪ (ללא קשר לסוג חשבון)
+    const CP_VALUE_ILS = 0.0324;
+
     const PRICING = {
       [ACCOUNT.DISCOUNT]: {
         years: 40,
@@ -516,111 +481,201 @@
       }
     };
 
-    // מגבלות (כאן משנים מגבלות – הערות ברורות)
     const LIMITS = {
-      yearsMax: 9,                  // מקסימום וותק בשנים
-      mythicWeaponsMax: 32,         // מקסימום נשקי מיטיק
-      legendaryWeaponsMax: 255,     // מקסימום נשקי לג'נדרי
-      epicWeaponsMax: 991           // מקסימום נשקי אפיק
-      // המשך מגבלות בחלק 2...
+      // כאן משנים מגבלות
+      cpMax: 999999,                 // מקסימום CP (אם תרצה להקטין/להגדיל)
+      yearsMax: 9,
+      mythicWeaponsMax: 32,
+      legendaryWeaponsMax: 255,
+      epicWeaponsMax: 991,
+      mythicOperatorsMax: 7,
+      legendaryOperatorsMax: 28,
+      epicOperatorsMax: 1000,
+      rareLegendaryOperatorsMax: 100,
+      accountLevelMax: 400
     };
 
-    /*****************************************************************
-     * STATE
-     *****************************************************************/
+    const SEASONAL_MODES = ["mp","br","dmz"];
+
+    const RANK_GROUPS = [
+      { key:"PRO", label:"PRO", color:"var(--aqua)", steps:["I","II","III","IV","V"] },
+      { key:"MASTER", label:"MASTER", color:"var(--purple)", steps:["I","II","III","IV","V"] },
+      { key:"GRAND_MASTER", label:"GRAND MASTER", color:"var(--orange)", steps:["I","II","III","IV","V"] },
+      { key:"LEGENDARY", label:"LEGENDARY", color:"var(--red)", steps:[""] }
+    ];
+
     const state = {
-      accountType: null,     // discount / regular
+      // CP step
+      cpSign: "plus",          // "plus" / "minus"
+      cpAmount: 0,             // מספר חיובי תמיד. אם מינוס => מורידים מההשקעה
+
+      // existing
+      accountType: null,
       years: 0,
+
       mythicWeapons: 0,
       mythicWeaponsMax: 0,
       legendaryWeapons: 0,
       epicWeapons: 0,
-      investmentValue: 0     // תמיד מוצג למעלה בירוק
+
+      mythicOperators: 0,
+      mythicOperatorsMax: 0,
+      legendaryOperators: 0,
+      epicOperators: 0,
+
+      hasRareLegendaryOperators: false,
+      rareLegendaryOperators: 0,
+
+      accountLevel: 0,
+      seasonal: { mp:null, br:null, dmz:null },
+
+      investmentValue: 0
     };
 
-    // תצוגת סכום עם אנימציה
+    /*****************************************************************
+     * Money animation (center)
+     *****************************************************************/
     const moneyEl = document.getElementById("moneyDisplay");
-    let moneyAnim = { from:0, to:0, start:0, dur: 320, raf: null };
+    let moneyRAF = null;
 
     function formatILS(n){
-      // תמיד ₪ בסוף, כמו שביקשת
       const v = Number.isFinite(n) ? n : 0;
       return v.toFixed(2) + "₪";
     }
 
     function animateMoneyTo(target){
-      const now = performance.now();
-      const currentShown = parseFloat((moneyEl.textContent || "0").replace("₪","")) || 0;
+      const from = parseFloat((moneyEl.textContent || "0").replace("₪","")) || 0;
+      const start = performance.now();
+      const dur = 320;
 
-      moneyAnim.from = currentShown;
-      moneyAnim.to = target;
-      moneyAnim.start = now;
-      moneyAnim.dur = 320;
-
-      if (moneyAnim.raf) cancelAnimationFrame(moneyAnim.raf);
+      if (moneyRAF) cancelAnimationFrame(moneyRAF);
 
       const tick = (t) => {
-        const p = Math.min(1, (t - moneyAnim.start) / moneyAnim.dur);
-        // easing
+        const p = Math.min(1, (t - start) / dur);
         const eased = 1 - Math.pow(1 - p, 3);
-        const val = moneyAnim.from + (moneyAnim.to - moneyAnim.from) * eased;
+        const val = from + (target - from) * eased;
         moneyEl.textContent = formatILS(val);
-        if (p < 1) moneyAnim.raf = requestAnimationFrame(tick);
+        if (p < 1) moneyRAF = requestAnimationFrame(tick);
       };
-      moneyAnim.raf = requestAnimationFrame(tick);
+      moneyRAF = requestAnimationFrame(tick);
+    }
+
+    function seasonalStepsCount(){
+      let c = 0;
+      for (const m of SEASONAL_MODES) if (state.seasonal[m]) c += 1;
+      return c;
     }
 
     function recalcInvestment(){
-      if (!state.accountType) {
-        state.investmentValue = 0;
-        animateMoneyTo(0);
-        return;
+      // אם עוד לא נבחר סוג חשבון – עדיין אפשר לחשב CP (כי זה לפני) אבל נשמור סכום כ-0 עד שבוחרים סוג?
+      // לפי הבקשה שלך: הסכום צריך להתעדכן "כבר מהשאלה הראשונה".
+      // לכן: CP כן משפיע מהתחלה, וכל השאר יחכה עד accountType.
+      let total = 0;
+
+      // CP value always counts (plus adds, minus subtracts)
+      const cpWorth = state.cpAmount * CP_VALUE_ILS;
+      total += (state.cpSign === "minus") ? (-cpWorth) : (cpWorth);
+
+      if (state.accountType){
+        const P = PRICING[state.accountType];
+
+        state.mythicWeaponsMax = Math.min(state.mythicWeaponsMax, state.mythicWeapons);
+        state.mythicOperatorsMax = Math.min(state.mythicOperatorsMax, state.mythicOperators);
+        if (!state.hasRareLegendaryOperators) state.rareLegendaryOperators = 0;
+
+        total +=
+          (state.years * P.years) +
+
+          (state.mythicWeapons * P.mythicWeapon) +
+          (state.mythicWeaponsMax * P.mythicWeaponMaxUpgrade) +
+          (state.legendaryWeapons * P.legendaryWeapon) +
+          (state.epicWeapons * P.epicWeapon) +
+
+          (state.mythicOperators * P.mythicOperator) +
+          (state.mythicOperatorsMax * P.mythicOperatorMaxUpgrade) +
+          (state.legendaryOperators * P.legendaryOperator) +
+          (state.epicOperators * P.epicOperator) +
+          (state.rareLegendaryOperators * P.rareLegendaryOperator) +
+
+          (state.accountLevel * P.accountLevel) +
+
+          (seasonalStepsCount() * P.seasonalRankStep);
       }
-
-      const P = PRICING[state.accountType];
-
-      // שמים לב: שדרוג מקסימום לא יכול להיות יותר מהכמות
-      state.mythicWeaponsMax = Math.min(state.mythicWeaponsMax, state.mythicWeapons);
-
-      const total =
-        (state.years * P.years) +
-        (state.mythicWeapons * P.mythicWeapon) +
-        (state.mythicWeaponsMax * P.mythicWeaponMaxUpgrade) +
-        (state.legendaryWeapons * P.legendaryWeapon) +
-        (state.epicWeapons * P.epicWeapon);
 
       state.investmentValue = total;
       animateMoneyTo(total);
+      saveToStorage();
     }
 
     /*****************************************************************
-     * MODAL
+     * Modal
      *****************************************************************/
-    const modalOverlay = document.getElementById("modalOverlay");
-    const modalTitle = document.getElementById("modalTitle");
-    const modalBody = document.getElementById("modalBody");
-    const modalClose = document.getElementById("modalClose");
+    const overlay = document.getElementById("overlay");
+    const mTitle = document.getElementById("mTitle");
+    const mBody = document.getElementById("mBody");
+    const mClose = document.getElementById("mClose");
 
     function openModal(title, text){
-      modalTitle.textContent = title || "מידע";
-      modalBody.textContent = text || "";
-      modalOverlay.classList.add("show");
-      modalOverlay.setAttribute("aria-hidden","false");
+      mTitle.textContent = title || "מידע";
+      mBody.textContent = text || "";
+      overlay.classList.add("show");
+      overlay.setAttribute("aria-hidden","false");
     }
     function closeModal(){
-      modalOverlay.classList.remove("show");
-      modalOverlay.setAttribute("aria-hidden","true");
+      overlay.classList.remove("show");
+      overlay.setAttribute("aria-hidden","true");
     }
-    modalClose.addEventListener("click", closeModal);
-    modalOverlay.addEventListener("click", (e) => {
-      if (e.target === modalOverlay) closeModal();
-    });
-    document.addEventListener("keydown", (e) => {
-      if (e.key === "Escape" && modalOverlay.classList.contains("show")) closeModal();
-    });
+    mClose.addEventListener("click", closeModal);
+    overlay.addEventListener("click", (e) => { if (e.target === overlay) closeModal(); });
+    document.addEventListener("keydown", (e) => { if (e.key === "Escape" && overlay.classList.contains("show")) closeModal(); });
 
     /*****************************************************************
-     * STEP ENGINE (שאלה אחת בכל מסך)
+     * Storage
+     *****************************************************************/
+    function saveToStorage(){
+      try{
+        localStorage.setItem(STORAGE_KEY, JSON.stringify({ savedAt: Date.now(), state }));
+      }catch(_e){}
+    }
+    function loadFromStorage(){
+      try{
+        const raw = localStorage.getItem(STORAGE_KEY);
+        if (!raw) return null;
+        return JSON.parse(raw);
+      }catch(_e){ return null; }
+    }
+    function resetAll(){
+      state.cpSign = "plus";
+      state.cpAmount = 0;
+
+      state.accountType = null;
+      state.years = 0;
+
+      state.mythicWeapons = 0;
+      state.mythicWeaponsMax = 0;
+      state.legendaryWeapons = 0;
+      state.epicWeapons = 0;
+
+      state.mythicOperators = 0;
+      state.mythicOperatorsMax = 0;
+      state.legendaryOperators = 0;
+      state.epicOperators = 0;
+
+      state.hasRareLegendaryOperators = false;
+      state.rareLegendaryOperators = 0;
+
+      state.accountLevel = 0;
+      state.seasonal.mp = null;
+      state.seasonal.br = null;
+      state.seasonal.dmz = null;
+
+      state.investmentValue = 0;
+      saveToStorage();
+      animateMoneyTo(0);
+    }
+
+    /*****************************************************************
+     * Step engine
      *****************************************************************/
     const stepsHost = document.getElementById("stepsHost");
     const welcome = document.getElementById("welcome");
@@ -632,114 +687,248 @@
     function showStep(i){
       stepEls.forEach((el, idx) => el.classList.toggle("active", idx === i));
       currentStepIndex = i;
-      // נגישות
       const active = stepEls[i];
       if (active) active.scrollIntoView({ behavior:"smooth", block:"start" });
     }
-
-    function nextStep(){
-      // דילוג מותנה: אם אין נשקי מיטיק, מדלגים על שלב "כמה מקסימום"
-      if (currentStepIndex === findStepIndex("mythicWeapons")) {
-        if (state.mythicWeapons <= 0) {
-          const idx = findStepIndex("mythicWeaponsMax");
-          if (idx !== -1) return showStep(idx + 1);
-        }
-      }
-      showStep(Math.min(stepEls.length - 1, currentStepIndex + 1));
-    }
-
-    function prevStep(){
-      // חזרה מותנית: אם דילגנו על "כמה מקסימום" ונחזור אחורה משלב לג'נדרי, נחזור למיטיק (ולא למקסימום)
-      const mythMaxIdx = findStepIndex("mythicWeaponsMax");
-      const legIdx = findStepIndex("legendaryWeapons");
-      if (currentStepIndex === legIdx && state.mythicWeapons <= 0) {
-        const mythIdx = findStepIndex("mythicWeapons");
-        if (mythIdx !== -1) return showStep(mythIdx);
-      }
-      showStep(Math.max(0, currentStepIndex - 1));
-    }
-
     function findStepIndex(id){
       return stepEls.findIndex(el => el.dataset.stepId === id);
     }
 
+    function nextStep(){
+      const id = stepEls[currentStepIndex]?.dataset?.stepId;
+
+      // skips
+      if (id === "mythicWeapons" && state.mythicWeapons <= 0){
+        const idx = findStepIndex("mythicWeaponsMax");
+        if (idx !== -1) return showStep(idx + 1);
+      }
+      if (id === "mythicOperators" && state.mythicOperators <= 0){
+        const idx = findStepIndex("mythicOperatorsMax");
+        if (idx !== -1) return showStep(idx + 1);
+      }
+      if (id === "hasRareLegendaryOperators" && !state.hasRareLegendaryOperators){
+        const idx = findStepIndex("rareLegendaryOperators");
+        if (idx !== -1) return showStep(idx + 1);
+      }
+      if (id === "seasonalRank"){
+        const sumIdx = findStepIndex("summary");
+        if (sumIdx !== -1){
+          const sumEl = stepEls[sumIdx];
+          if (sumEl && sumEl.refreshSummary) sumEl.refreshSummary();
+          return showStep(sumIdx);
+        }
+      }
+
+      showStep(Math.min(stepEls.length - 1, currentStepIndex + 1));
+    }
+
+    function prevStep(){
+      const id = stepEls[currentStepIndex]?.dataset?.stepId;
+
+      if (id === "legendaryWeapons" && state.mythicWeapons <= 0){
+        const mythIdx = findStepIndex("mythicWeapons");
+        if (mythIdx !== -1) return showStep(mythIdx);
+      }
+      if (id === "legendaryOperators" && state.mythicOperators <= 0){
+        const mythOpIdx = findStepIndex("mythicOperators");
+        if (mythOpIdx !== -1) return showStep(mythOpIdx);
+      }
+      if (id === "accountLevel" && !state.hasRareLegendaryOperators){
+        const ynIdx = findStepIndex("hasRareLegendaryOperators");
+        if (ynIdx !== -1) return showStep(ynIdx);
+      }
+
+      showStep(Math.max(0, currentStepIndex - 1));
+    }
+
     /*****************************************************************
-     * UI BUILDERS
+     * UI builders (clean)
      *****************************************************************/
-    function makeStepShell(stepId, title, helpTextLabel, helpTitle, helpBody){
+    function makeStep(stepId, questionText, helpLabel, helpTitle, helpBody){
       const sec = document.createElement("section");
       sec.className = "step";
       sec.dataset.stepId = stepId;
 
-      const top = document.createElement("div");
-      top.className = "qTitle";
+      const q = document.createElement("div");
+      q.className = "q";
+      q.textContent = questionText;
 
-      const h2 = document.createElement("h2");
-      h2.textContent = title;
+      sec.appendChild(q);
 
-      const hint = document.createElement("div");
-      hint.className = "hintLine";
-
-      const left = document.createElement("span");
-      left.textContent = "";
-
-      hint.appendChild(left);
-
-      if (helpTextLabel){
-        const help = document.createElement("a");
-        help.className = "helpLink";
-        help.href = "javascript:void(0)";
-        help.textContent = helpTextLabel;
-        help.addEventListener("click", () => openModal(helpTitle, helpBody));
-        hint.appendChild(help);
+      if (helpLabel){
+        const help = document.createElement("div");
+        help.className = "help";
+        const a = document.createElement("a");
+        a.href = "javascript:void(0)";
+        a.textContent = helpLabel;
+        a.addEventListener("click", () => openModal(helpTitle, helpBody));
+        help.appendChild(a);
+        sec.appendChild(help);
       }
 
-      top.appendChild(h2);
-      top.appendChild(hint);
-
-      sec.appendChild(top);
       return sec;
     }
 
-    function makeNav(sec, { canNext = true, nextText="הבא", prevText="חזור", hidePrev=false } = {}){
-      const row = document.createElement("div");
-      row.className = "navRow";
+    function makeNav(sec, { nextText="הבא", prevText="חזור", hidePrev=false, nextEnabled=true } = {}){
+      const nav = document.createElement("div");
+      nav.className = "nav";
 
       const prev = document.createElement("button");
-      prev.className = "navBtn";
       prev.type = "button";
       prev.textContent = prevText;
-      prev.disabled = false;
       prev.addEventListener("click", prevStep);
 
       const next = document.createElement("button");
-      next.className = "navBtn primary";
       next.type = "button";
+      next.className = "primary";
       next.textContent = nextText;
-      next.disabled = !canNext;
+      next.disabled = !nextEnabled;
       next.addEventListener("click", nextStep);
 
-      if (!hidePrev) row.appendChild(prev);
-      row.appendChild(next);
+      if (!hidePrev) nav.appendChild(prev);
+      nav.appendChild(next);
 
-      sec.appendChild(row);
-
+      sec.appendChild(nav);
       return { prevBtn: prev, nextBtn: next };
     }
 
-    function makeTwoChoice(stepId, title, helpLabel, helpTitle, helpBody, leftLabel, rightLabel, onPick){
-      const sec = makeStepShell(stepId, title, helpLabel, helpTitle, helpBody);
+    function clampInt(v, min, max){
+      const n = parseInt(String(v).replace(/[^\d]/g,''), 10);
+      if (!Number.isFinite(n)) return min;
+      return Math.min(max, Math.max(min, n));
+    }
+
+    function wireSelectAllOnFocus(input){
+      // הופך הקלדה לחלקה: לחיצה => מסמן הכל מיד (לא צריך לתפוס את "0")
+      input.addEventListener("focus", () => {
+        requestAnimationFrame(() => input.select());
+      });
+      input.addEventListener("mouseup", (e) => {
+        // מונע ביטול select במובייל/דסקטופ
+        e.preventDefault();
+      });
+    }
+
+    function makeNumberStep({
+      stepId, questionText, helpLabel, helpTitle, helpBody,
+      rarityClass, unitLabel,
+      min=0, max=100,
+      getValue, setValue,
+      onChange
+    }){
+      const sec = makeStep(stepId, questionText, helpLabel, helpTitle, helpBody);
+
+      const area = document.createElement("div");
+      area.className = "numArea";
+
+      const big = document.createElement("div");
+      big.className = "bigNum";
+
+      const n = document.createElement("div");
+      n.className = "n";
+      if (rarityClass) n.classList.add(rarityClass);
+      n.textContent = String(getValue());
+
+      const unit = document.createElement("div");
+      unit.className = "unit";
+      unit.textContent = unitLabel || "";
+
+      big.appendChild(n);
+      big.appendChild(unit);
+
+      const input = document.createElement("input");
+      input.className = "numInput";
+      input.type = "text";
+      input.inputMode = "numeric";
+      input.autocomplete = "off";
+      input.spellcheck = false;
+      input.value = String(getValue());
+      input.setAttribute("aria-label", questionText);
+
+      wireSelectAllOnFocus(input);
+
+      const rangeWrap = document.createElement("div");
+      rangeWrap.className = "rangeWrap";
+
+      const frac = document.createElement("div");
+      frac.className = "frac";
+      const left = document.createElement("span");
+      left.textContent = "מגבלה";
+      const right = document.createElement("span");
+      right.textContent = `${getValue()}/${max}`;
+      frac.appendChild(left);
+      frac.appendChild(right);
+
+      const slider = document.createElement("input");
+      slider.type = "range";
+      slider.min = String(min);
+      slider.max = String(max);
+      slider.step = "1";
+      slider.value = String(getValue());
+
+      const bar = document.createElement("div");
+      bar.className = "bar";
+      const fill = document.createElement("div");
+      fill.className = "fill";
+      bar.appendChild(fill);
+
+      function sync(v){
+        n.textContent = String(v);
+        input.value = String(v);
+        slider.value = String(v);
+        right.textContent = `${v}/${max}`;
+        fill.style.width = (max === 0 ? 0 : (v / max) * 100) + "%";
+      }
+
+      sync(getValue());
+
+      slider.addEventListener("input", () => {
+        const v = clampInt(slider.value, min, max);
+        setValue(v);
+        sync(v);
+        onChange && onChange(v);
+      });
+
+      input.addEventListener("input", () => {
+        const cleaned = String(input.value).replace(/[^\d]/g,'');
+        const v = cleaned === "" ? 0 : clampInt(cleaned, min, max);
+        setValue(v);
+        sync(v);
+        onChange && onChange(v);
+      });
+
+      rangeWrap.appendChild(frac);
+      rangeWrap.appendChild(slider);
+      rangeWrap.appendChild(bar);
+
+      area.appendChild(big);
+      area.appendChild(input);
+      area.appendChild(rangeWrap);
+
+      sec.appendChild(area);
+
+      const nav = makeNav(sec, { nextEnabled:true });
+      return { sec, nav, sync };
+    }
+
+    function makeTwoChoiceStep({
+      stepId, questionText,
+      helpLabel, helpTitle, helpBody,
+      leftLabel, rightLabel,
+      onPick
+    }){
+      const sec = makeStep(stepId, questionText, helpLabel, helpTitle, helpBody);
 
       const grid = document.createElement("div");
       grid.className = "choices2";
 
       const b1 = document.createElement("button");
-      b1.className = "choiceBtn";
+      b1.className = "chip";
       b1.type = "button";
       b1.textContent = leftLabel;
 
       const b2 = document.createElement("button");
-      b2.className = "choiceBtn";
+      b2.className = "chip";
       b2.type = "button";
       b2.textContent = rightLabel;
 
@@ -756,463 +945,158 @@
 
       sec.appendChild(grid);
 
-      const nav = makeNav(sec, { canNext:false });
-
-      return { sec, nav, selectButtons: select };
+      const nav = makeNav(sec, { nextEnabled:false });
+      return { sec, nav, select };
     }
 
-    function clampInt(val, min, max){
-      const n = parseInt(String(val).replace(/[^\d]/g,''), 10);
-      if (!Number.isFinite(n)) return min;
-      return Math.min(max, Math.max(min, n));
-    }
+    /* CP Step UI */
+    function makeCPStep(){
+      const sec = makeStep(
+        "cp",
+        "כמה מטבעות CP קיימים בחשבון",
+        null, "", ""
+      );
 
-    function makeNumberStep({
-      stepId,
-      title,
-      helpLabel,
-      helpTitle,
-      helpBody,
-      rarityClass,          // rar-mythic / rar-legendary / rar-epic / null
-      unitLabel,            // "שנים" / "נשקים" וכו
-      min=0,
-      max=10,
-      getValue,
-      setValue,
-      onChange
-    }){
-      const sec = makeStepShell(stepId, title, helpLabel, helpTitle, helpBody);
-
-      const wrap = document.createElement("div");
-      wrap.className = "numWrap";
+      const area = document.createElement("div");
+      area.className = "numArea";
 
       const big = document.createElement("div");
       big.className = "bigNum";
 
-      const num = document.createElement("div");
-      num.className = "num";
-      if (rarityClass) num.classList.add(rarityClass);
-      num.textContent = String(getValue());
+      const n = document.createElement("div");
+      n.className = "n";
+      n.textContent = "0";
 
       const unit = document.createElement("div");
       unit.className = "unit";
-      unit.textContent = unitLabel || "";
+      unit.innerHTML = `CP <img class="coin" alt="" src="https://upload.wikimedia.org/wikipedia/commons/3/3f/Placeholder_view_vector.svg">`;
 
-      big.appendChild(num);
+      big.appendChild(n);
       big.appendChild(unit);
 
-      // input numeric - smooth on mobile
+      // plus/minus choice
+      const grid = document.createElement("div");
+      grid.className = "choices2";
+      grid.style.maxWidth = "420px";
+
+      const plus = document.createElement("button");
+      plus.className = "chip selected";
+      plus.type = "button";
+      plus.textContent = "פלוס (CP רגיל)";
+
+      const minus = document.createElement("button");
+      minus.className = "chip";
+      minus.type = "button";
+      minus.textContent = "מינוס (CP בחוב)";
+
+      const note = document.createElement("div");
+      note.style.textAlign = "center";
+      note.style.color = "var(--muted)";
+      note.style.fontSize = "13px";
+      note.style.fontWeight = "900";
+      note.style.marginTop = "6px";
+      note.textContent = "במידה ויש מינוס CP — בחר במינוס ואז גרור/הקלד את הכמות.";
+
+      grid.appendChild(plus);
+      grid.appendChild(minus);
+
+      // slider/input (same control, but number turns red and shown with - if minus)
       const input = document.createElement("input");
       input.className = "numInput";
-      input.setAttribute("inputmode","numeric");
-      input.setAttribute("autocomplete","off");
-      input.setAttribute("autocapitalize","off");
-      input.setAttribute("spellcheck","false");
-      input.setAttribute("maxlength", String(String(max).length));
-      input.type = "tel";
-      input.value = String(getValue());
+      input.type = "text";
+      input.inputMode = "numeric";
+      input.autocomplete = "off";
+      input.spellcheck = false;
+      input.value = "0";
+      wireSelectAllOnFocus(input);
 
-      // slider/progress info
-      const sliderRow = document.createElement("div");
-      sliderRow.className = "sliderRow";
+      const rangeWrap = document.createElement("div");
+      rangeWrap.className = "rangeWrap";
 
-      const sliderTop = document.createElement("div");
-      sliderTop.className = "sliderTop";
-
+      const frac = document.createElement("div");
+      frac.className = "frac";
       const left = document.createElement("span");
       left.textContent = "מגבלה";
-
-      const frac = document.createElement("span");
-      frac.className = "frac";
-      frac.textContent = `${getValue()}/${max}`;
-
-      sliderTop.appendChild(left);
-      sliderTop.appendChild(frac);
-
-      const pbar = document.createElement("div");
-      pbar.className = "pbar";
-      const pfill = document.createElement("div");
-      pfill.className = "pfill";
-      pbar.appendChild(pfill);
+      const right = document.createElement("span");
+      right.textContent = `0/${LIMITS.cpMax}`;
+      frac.appendChild(left);
+      frac.appendChild(right);
 
       const slider = document.createElement("input");
       slider.type = "range";
-      slider.min = String(min);
-      slider.max = String(max);
+      slider.min = "0";
+      slider.max = String(LIMITS.cpMax);
       slider.step = "1";
-      slider.value = String(getValue());
+      slider.value = "0";
 
-      function syncUI(v){
-        num.textContent = String(v);
+      const bar = document.createElement("div");
+      bar.className = "bar";
+      const fill = document.createElement("div");
+      fill.className = "fill";
+      bar.appendChild(fill);
+
+      function applySignUI(){
+        const isMinus = state.cpSign === "minus";
+        plus.classList.toggle("selected", !isMinus);
+        minus.classList.toggle("selected", isMinus);
+        n.classList.toggle("neg", isMinus);
+      }
+
+      function sync(v){
+        state.cpAmount = v;
+
+        const isMinus = state.cpSign === "minus";
+        const shown = isMinus ? `-${v}` : `${v}`;
+
+        n.textContent = shown;
         input.value = String(v);
         slider.value = String(v);
-        frac.textContent = `${v}/${max}`;
-        const pct = max === 0 ? 0 : (v / max) * 100;
-        pfill.style.width = Math.max(0, Math.min(100, pct)) + "%";
+        right.textContent = `${v}/${LIMITS.cpMax}`;
+        fill.style.width = (LIMITS.cpMax === 0 ? 0 : (v / LIMITS.cpMax) * 100) + "%";
+
+        recalcInvestment();
       }
 
-      // init
-      syncUI(getValue());
+      plus.addEventListener("click", () => {
+        state.cpSign = "plus";
+        applySignUI();
+        sync(state.cpAmount);
+      });
 
-      // slider -> value
+      minus.addEventListener("click", () => {
+        state.cpSign = "minus";
+        applySignUI();
+        sync(state.cpAmount);
+      });
+
       slider.addEventListener("input", () => {
-        const v = clampInt(slider.value, min, max);
-        setValue(v);
-        syncUI(v);
-        onChange && onChange(v);
+        const v = clampInt(slider.value, 0, LIMITS.cpMax);
+        sync(v);
       });
 
-      // input -> value (בלי לקפוץ, בלי שטויות)
       input.addEventListener("input", () => {
-        // מאפשר הקלדה חלקה: מנקים רק תווים לא ספרתיים, מגבילים למקסימום
         const cleaned = String(input.value).replace(/[^\d]/g,'');
-        // אם ריק – אל תתקן באגרסיביות עד שיצא, אבל נחשב כ-0
-        const v = cleaned === "" ? 0 : clampInt(cleaned, min, max);
-
-        // מונע מצב של "88" בשנים: max=9, אז זה ייחתך ל-9 מיד
-        setValue(v);
-        syncUI(v);
-        onChange && onChange(v);
+        const v = cleaned === "" ? 0 : clampInt(cleaned, 0, LIMITS.cpMax);
+        sync(v);
       });
 
-      sliderRow.appendChild(sliderTop);
-      sliderRow.appendChild(slider);
-      sliderRow.appendChild(pbar);
+      applySignUI();
+      sync(0);
 
-      wrap.appendChild(big);
-      wrap.appendChild(input);
-      wrap.appendChild(sliderRow);
+      rangeWrap.appendChild(frac);
+      rangeWrap.appendChild(slider);
+      rangeWrap.appendChild(bar);
 
-      sec.appendChild(wrap);
+      area.appendChild(big);
+      area.appendChild(grid);
+      area.appendChild(note);
+      area.appendChild(input);
+      area.appendChild(rangeWrap);
 
-      const nav = makeNav(sec, { canNext:true });
+      sec.appendChild(area);
 
-      return { sec, nav, syncUI };
-    }
-
-    /*****************************************************************
-     * BUILD STEPS (חלק 1: עד נשקי אפיק)
-     *****************************************************************/
-    function buildSteps(){
-      stepsHost.innerHTML = "";
-      stepEls.length = 0;
-
-      // 1) סוג חשבון
-      const s1 = makeTwoChoice(
-        "accountType",
-        "בחר סוג חשבון",
-        "איך אני יודע איזה סוג חשבון יש לי",
-        "איך מזהים סוג חשבון",
-        "חשבון מוזל זה חשבון שנפתח בהודו או בישראל דרך VPN שמחובר להודו.\nאם אתם לא בטוחים: בחשבון מוזל פתיחות של הגרלות מתחילות ב־10 CP.\nבחשבון לא מוזל פתיחות מתחילות ב־30 CP.",
-        "חשבון מוזל",
-        "חשבון לא מוזל",
-        (which) => {
-          state.accountType = (which === 1) ? ACCOUNT.DISCOUNT : ACCOUNT.REGULAR;
-          recalcInvestment();
-          s1.nav.nextBtn.disabled = false;
-        }
-      );
-
-      stepEls.push(s1.sec);
-      stepsHost.appendChild(s1.sec);
-
-      // 2) וותק בשנים
-      const s2 = makeNumberStep({
-        stepId: "years",
-        title: "מה וותק החשבון",
-        helpLabel: null,
-        helpTitle: "",
-        helpBody: "",
-        rarityClass: null,
-        unitLabel: "שנים",
-        min: 0,
-        max: LIMITS.yearsMax, // שינוי כאן אם תרצה
-        getValue: () => state.years,
-        setValue: (v) => { state.years = v; },
-        onChange: () => { recalcInvestment(); }
-      });
-      stepEls.push(s2.sec);
-      stepsHost.appendChild(s2.sec);
-
-      // 3) נשקי מיטיק
-      const s3 = makeNumberStep({
-        stepId: "mythicWeapons",
-        title: "כמה נשקים מיטיק קיימים בחשבון",
-        helpLabel: "מה זה מיטיק",
-        helpTitle: "מה זה מיטיק",
-        helpBody: "מיטיק זה נשק/דמות שמופיעים בקטגוריה האדומה.\nמיטיק זה כל דבר שאפשר לשדרג.\nלדוגמה: נשק מיטיק אחרי קניה אפשר לשדרג בתשלום.\nדמות מיטיק גם יכולה להיות משודרגת.",
-        rarityClass: "rar-mythic",
-        unitLabel: "נשקים",
-        min: 0,
-        max: LIMITS.mythicWeaponsMax, // שינוי כאן אם תרצה
-        getValue: () => state.mythicWeapons,
-        setValue: (v) => {
-          state.mythicWeapons = v;
-          // תואם: מקסימום לא יכול להיות מעל הכמות
-          state.mythicWeaponsMax = Math.min(state.mythicWeaponsMax, v);
-        },
-        onChange: () => { recalcInvestment(); }
-      });
-      stepEls.push(s3.sec);
-      stepsHost.appendChild(s3.sec);
-
-      // 4) מתוכם ברמת מקסימום (מותנה)
-      const s4 = makeNumberStep({
-        stepId: "mythicWeaponsMax",
-        title: "כמה מתוכם ברמת מקסימום",
-        helpLabel: "מה זה מקסימום",
-        helpTitle: "מה זה מקסימום (MAX)",
-        helpBody: "מקסימום (MAX) זה אומר נשק או דמות מיטיק ששודרגה לרמה המקסימלית.\nלא חצי מקסימום.",
-        rarityClass: "rar-mythic",
-        unitLabel: "MAX",
-        min: 0,
-        max: LIMITS.mythicWeaponsMax, // נשאר 32, בפועל נחתוך לפי הכמות שנבחרה
-        getValue: () => state.mythicWeaponsMax,
-        setValue: (v) => { state.mythicWeaponsMax = v; },
-        onChange: () => { recalcInvestment(); }
-      });
-      stepEls.push(s4.sec);
-      stepsHost.appendChild(s4.sec);
-
-      // 5) נשקי לג'נדרי
-      const s5 = makeNumberStep({
-        stepId: "legendaryWeapons",
-        title: "כמה נשקי לג׳נדרי קיימים בחשבון",
-        helpLabel: null,
-        helpTitle: "",
-        helpBody: "",
-        rarityClass: "rar-legendary",
-        unitLabel: "נשקים",
-        min: 0,
-        max: LIMITS.legendaryWeaponsMax, // שינוי כאן אם תרצה
-        getValue: () => state.legendaryWeapons,
-        setValue: (v) => { state.legendaryWeapons = v; },
-        onChange: () => { recalcInvestment(); }
-      });
-      stepEls.push(s5.sec);
-      stepsHost.appendChild(s5.sec);
-
-      // 6) נשקי אפיק
-      const s6 = makeNumberStep({
-        stepId: "epicWeapons",
-        title: "כמה נשקי אפיק (Epic) קיימים בחשבון",
-        helpLabel: null,
-        helpTitle: "",
-        helpBody: "",
-        rarityClass: "rar-epic",
-        unitLabel: "נשקים",
-        min: 0,
-        max: LIMITS.epicWeaponsMax, // שינוי כאן אם תרצה
-        getValue: () => state.epicWeapons,
-        setValue: (v) => { state.epicWeapons = v; },
-        onChange: () => { recalcInvestment(); }
-      });
-      stepEls.push(s6.sec);
-      stepsHost.appendChild(s6.sec);
-
-      // עד כאן חלק 1. חלק 2 יוסיף את כל השאלות הבאות + סיכום + שמירה בדפדפן ויסגור HTML.
-      // כרגע נוודא מצב התחלתי:
-      showStep(0);
-    }
-
-    startBtn.addEventListener("click", () => {
-      welcome.style.display = "none";
-      buildSteps();
-      recalcInvestment();
-      showStep(0);
-    });
-
-    // מצב פתיחה
-    animateMoneyTo(0);
- 
-<!-- ממשיכים בחלק 2 כאן (לא לסגור body/html עדיין) -->
-
-
-    /*****************************************************************
-     * ===========================
-     * PART 2/2 (המשך ישיר)
-     * ===========================
-     * SEO: בלי SEO כרגע (נשאר noindex ב-HEAD)
-     *****************************************************************/
-
-    // המשך מגבלות (כאן משנים מגבלות – הערות ברורות)
-    Object.assign(LIMITS, {
-      mythicOperatorsMax: 7,            // מקסימום דמויות מיטיק
-      legendaryOperatorsMax: 28,        // מקסימום דמויות לג'נדרי
-      epicOperatorsMax: 1000,           // מקסימום דמויות אפיק
-      rareLegendaryOperatorsMax: 100,   // מקסימום דמויות אגדיות נדירות (שנה אם צריך)
-      accountLevelMax: 400              // מקסימום Level חשבון
-    });
-
-    // שמירה בדפדפן
-    const STORAGE_KEY = "codm_value_calc_v1";
-
-    // דירוג עונתי: לפי ההגדרה שלך => כל דרגה שנבחרת = 1₪ (לא משנה I/II/III/IV/V)
-    // כלומר: כל אחד מה-3 מצבים (MP/BR/DMZ) שנסגר על דרגה מסוימת מוסיף +1₪.
-    // אם לא בוחרים מצב מסוים => 0₪.
-    const SEASONAL_MODES = ["mp", "br", "dmz"];
-
-    // מיפוי דרגות לתצוגה וצבעים (רק טקסט)
-    const RANK_GROUPS = [
-      { key:"PRO", label:"PRO", color:"var(--accent)", steps:["I","II","III","IV","V"] },
-      { key:"MASTER", label:"MASTER", color:"var(--epic)", steps:["I","II","III","IV","V"] },
-      { key:"GRAND_MASTER", label:"GRAND MASTER", color:"var(--legendary)", steps:["I","II","III","IV","V"] },
-      { key:"LEGENDARY", label:"LEGENDARY", color:"var(--mythic)", steps:[""] } // לג'נדרי בלי I-V (לפי הבקשה שלך)
-    ];
-
-    // הרחבת STATE
-    Object.assign(state, {
-      mythicOperators: 0,
-      mythicOperatorsMax: 0,
-      legendaryOperators: 0,
-      epicOperators: 0,
-      hasRareLegendaryOperators: false,
-      rareLegendaryOperators: 0,
-      accountLevel: 0,
-      seasonal: {
-        mp: null,   // string rank label
-        br: null,
-        dmz: null
-      }
-    });
-
-    /*****************************************************************
-     * UTIL: חישוב השקעה (כולל חלק 2)
-     *****************************************************************/
-    function seasonalStepsCount(){
-      // כל מצב שנבחר בו דירוג => 1 (לא משנה I/II/III...)
-      let count = 0;
-      for (const m of SEASONAL_MODES){
-        if (state.seasonal[m]) count += 1;
-      }
-      return count;
-    }
-
-    function recalcInvestmentFull(){
-      // תחליף את recalcInvestment הקודם לכל הערכים
-      if (!state.accountType) {
-        state.investmentValue = 0;
-        animateMoneyTo(0);
-        return;
-      }
-
-      const P = PRICING[state.accountType];
-
-      // התאמות/חסימות
-      state.mythicWeaponsMax = Math.min(state.mythicWeaponsMax, state.mythicWeapons);
-      state.mythicOperatorsMax = Math.min(state.mythicOperatorsMax, state.mythicOperators);
-
-      if (!state.hasRareLegendaryOperators) state.rareLegendaryOperators = 0;
-
-      const seasonalCount = seasonalStepsCount();
-
-      const total =
-        // וותק
-        (state.years * P.years) +
-
-        // נשקים
-        (state.mythicWeapons * P.mythicWeapon) +
-        (state.mythicWeaponsMax * P.mythicWeaponMaxUpgrade) +
-        (state.legendaryWeapons * P.legendaryWeapon) +
-        (state.epicWeapons * P.epicWeapon) +
-
-        // דמויות
-        (state.mythicOperators * P.mythicOperator) +
-        (state.mythicOperatorsMax * P.mythicOperatorMaxUpgrade) +
-        (state.legendaryOperators * P.legendaryOperator) +
-        (state.epicOperators * P.epicOperator) +
-        (state.rareLegendaryOperators * P.rareLegendaryOperator) +
-
-        // לבל חשבון
-        (state.accountLevel * P.accountLevel) +
-
-        // דירוג עונתי (לפי דרגה=1₪ לכל מוד שנבחר)
-        (seasonalCount * P.seasonalRankStep);
-
-      state.investmentValue = total;
-      animateMoneyTo(total);
-    }
-
-    // מחליפים קריאות ישנות לגרסה מלאה
-    const recalcInvestmentOriginal = recalcInvestment;
-    recalcInvestment = recalcInvestmentFull;
-
-    /*****************************************************************
-     * BUILDER: שאלת כן/לא + אם כן => מספר
-     *****************************************************************/
-    function makeYesNoStep({
-      stepId,
-      title,
-      helpLabel,
-      helpTitle,
-      helpBody,
-      yesLabel="כן",
-      noLabel="לא",
-      getValueBool,
-      setValueBool
-    }){
-      const sec = makeStepShell(stepId, title, helpLabel, helpTitle, helpBody);
-
-      const grid = document.createElement("div");
-      grid.className = "choices2";
-
-      const yes = document.createElement("button");
-      yes.className = "choiceBtn";
-      yes.type = "button";
-      yes.textContent = yesLabel;
-
-      const no = document.createElement("button");
-      no.className = "choiceBtn";
-      no.type = "button";
-      no.textContent = noLabel;
-
-      function sync(){
-        const v = !!getValueBool();
-        yes.classList.toggle("selected", v === true);
-        no.classList.toggle("selected", v === false);
-      }
-
-      yes.addEventListener("click", () => {
-        setValueBool(true);
-        sync();
-        recalcInvestment();
-      });
-
-      no.addEventListener("click", () => {
-        setValueBool(false);
-        sync();
-        recalcInvestment();
-      });
-
-      grid.appendChild(yes);
-      grid.appendChild(no);
-
-      sec.appendChild(grid);
-
-      const nav = makeNav(sec, { canNext:true });
-
-      // init
-      sync();
-
-      return { sec, nav, sync };
-    }
-
-    /*****************************************************************
-     * דירוג עונתי UI (3 כפתורים + לכל אחד סליידר דרגות)
-     *****************************************************************/
-    function rankLabelToIndex(label){
-      // label example: "PRO III" / "MASTER V" / "GRAND MASTER II" / "LEGENDARY"
-      if (!label) return 0;
-      // הופכים לרשימה שטוחה
-      const flat = buildFlatRanks();
-      const idx = flat.findIndex(x => x.label === label);
-      return idx < 0 ? 0 : idx;
-    }
-
-    function indexToRankLabel(idx){
-      const flat = buildFlatRanks();
-      const i = Math.max(0, Math.min(flat.length - 1, idx));
-      return flat[i].label;
+      const nav = makeNav(sec, { nextEnabled:true, hidePrev:true });
+      return { sec, nav };
     }
 
     function buildFlatRanks(){
@@ -1220,483 +1104,391 @@
       for (const g of RANK_GROUPS){
         if (g.key === "LEGENDARY"){
           flat.push({ label:"LEGENDARY", color:g.color });
-          continue;
-        }
-        for (const s of g.steps){
-          flat.push({ label:`${g.label} ${s}`, color:g.color });
+        } else {
+          for (const s of g.steps){
+            flat.push({ label:`${g.label} ${s}`, color:g.color });
+          }
         }
       }
       return flat;
     }
 
     function makeSeasonalRankStep(){
-      const sec = makeStepShell(
-        "seasonalRank",
-        "מה רמת הדירוג העונתי של החשבון (RANK)",
-        null,
-        "",
-        ""
-      );
+      const sec = makeStep("seasonalRank", "מה רמת הדירוג העונתי של החשבון (RANK)", null, "", "");
 
-      // כפתורים 3 ב-row
       const row = document.createElement("div");
+      row.style.maxWidth = "720px";
+      row.style.margin = "14px auto 0";
       row.style.display = "grid";
       row.style.gridTemplateColumns = "1fr 1fr 1fr";
-      row.style.gap = "10px";
+      row.style.gap = "12px";
 
-      function makeModeBtn(label, key){
+      function modeBtn(label, key){
         const b = document.createElement("button");
-        b.className = "choiceBtn";
+        b.className = "chip";
         b.type = "button";
         b.textContent = label;
-        b.dataset.modeKey = key;
+        b.dataset.mode = key;
         return b;
       }
+      const bMP = modeBtn("Multiplayer", "mp");
+      const bBR = modeBtn("Battle royal", "br");
+      const bDMZ = modeBtn("DMZ", "dmz");
+      row.appendChild(bMP); row.appendChild(bBR); row.appendChild(bDMZ);
 
-      const btnMP = makeModeBtn("Multiplayer", "mp");
-      const btnBR = makeModeBtn("Battle royal", "br");
-      const btnDMZ = makeModeBtn("DMZ", "dmz");
-
-      row.appendChild(btnMP);
-      row.appendChild(btnBR);
-      row.appendChild(btnDMZ);
-
-      sec.appendChild(row);
-
-      const panelsHost = document.createElement("div");
-      panelsHost.style.display = "grid";
-      panelsHost.style.gap = "10px";
-      panelsHost.style.marginTop = "10px";
-      sec.appendChild(panelsHost);
+      const panels = document.createElement("div");
+      panels.style.maxWidth = "720px";
+      panels.style.margin = "12px auto 0";
+      panels.style.display = "grid";
+      panels.style.gap = "12px";
 
       const flat = buildFlatRanks();
       const maxIdx = flat.length - 1;
 
-      function buildPanel(modeKey, title){
-        const panel = document.createElement("div");
-        panel.className = "numWrap";
-        panel.style.display = "none"; // נפתח רק אחרי לחיצה
-        panel.dataset.modePanel = modeKey;
+      function panelFor(modeKey, title){
+        const wrap = document.createElement("div");
+        wrap.style.display = "none";
+        wrap.dataset.panel = modeKey;
 
-        const head = document.createElement("div");
-        head.style.display = "flex";
-        head.style.alignItems = "center";
-        head.style.justifyContent = "space-between";
-        head.style.gap = "10px";
-
-        const t = document.createElement("div");
-        t.style.fontWeight = "900";
-        t.style.fontSize = "13px";
-        t.style.color = "rgba(255,255,255,.9)";
-        t.textContent = title;
-
-        const clear = document.createElement("button");
-        clear.className = "navBtn";
-        clear.type = "button";
-        clear.style.flex = "0 0 auto";
-        clear.style.padding = "10px 12px";
-        clear.textContent = "נקה";
-        clear.addEventListener("click", () => {
-          state.seasonal[modeKey] = null;
-          syncModeUI(modeKey);
-          recalcInvestment();
-        });
-
-        head.appendChild(t);
-        head.appendChild(clear);
+        const q = document.createElement("div");
+        q.style.textAlign = "center";
+        q.style.fontWeight = "1000";
+        q.style.color = "rgba(234,242,255,.88)";
+        q.style.marginBottom = "8px";
+        q.textContent = title;
 
         const big = document.createElement("div");
         big.className = "bigNum";
-        big.style.padding = "8px 0 0";
+        const label = document.createElement("div");
+        label.className = "n";
+        label.style.fontSize = "22px";
+        label.style.letterSpacing = ".2px";
+        label.style.width = "100%";
+        label.style.textAlign = "center";
+        label.textContent = "גרור כדי לבחור דירוג";
+        label.style.color = "rgba(234,242,255,.65)";
+        big.appendChild(label);
 
-        const labelEl = document.createElement("div");
-        labelEl.className = "num";
-        labelEl.style.fontSize = "22px";
-        labelEl.style.lineHeight = "1.2";
-        labelEl.style.letterSpacing = ".2px";
-        labelEl.style.textAlign = "center";
-        labelEl.style.width = "100%";
+        const rangeWrap = document.createElement("div");
+        rangeWrap.className = "rangeWrap";
 
-        big.appendChild(labelEl);
-
-        const sliderRow = document.createElement("div");
-        sliderRow.className = "sliderRow";
-
-        const sliderTop = document.createElement("div");
-        sliderTop.className = "sliderTop";
-
-        const left = document.createElement("span");
-        left.textContent = "דירוג";
-
-        const right = document.createElement("span");
-        right.className = "frac";
-        right.textContent = state.seasonal[modeKey] ? "נבחר" : "לא נבחר";
-
-        sliderTop.appendChild(left);
-        sliderTop.appendChild(right);
+        const frac = document.createElement("div");
+        frac.className = "frac";
+        const l = document.createElement("span"); l.textContent = "דירוג";
+        const r = document.createElement("span"); r.textContent = "לא נבחר";
+        frac.appendChild(l); frac.appendChild(r);
 
         const slider = document.createElement("input");
         slider.type = "range";
         slider.min = "0";
         slider.max = String(maxIdx);
         slider.step = "1";
-        slider.value = String(rankLabelToIndex(state.seasonal[modeKey] || flat[0].label));
+        slider.value = "0";
 
-        const pbar = document.createElement("div");
-        pbar.className = "pbar";
-        const pfill = document.createElement("div");
-        pfill.className = "pfill";
-        pbar.appendChild(pfill);
+        const bar = document.createElement("div");
+        bar.className = "bar";
+        const fill = document.createElement("div");
+        fill.className = "fill";
+        bar.appendChild(fill);
 
         function sync(){
           const chosen = state.seasonal[modeKey];
-          // אם אין בחירה עדיין – נציג "גרור כדי לבחור"
           if (!chosen){
-            labelEl.textContent = "גרור כדי לבחור דירוג";
-            labelEl.style.color = "rgba(255,255,255,.65)";
-            right.textContent = "לא נבחר";
-            pfill.style.width = "0%";
+            label.textContent = "גרור כדי לבחור דירוג";
+            label.style.color = "rgba(234,242,255,.65)";
+            r.textContent = "לא נבחר";
             slider.value = "0";
+            fill.style.width = "0%";
             return;
           }
-          const idx = rankLabelToIndex(chosen);
-          labelEl.textContent = chosen;
-          labelEl.style.color = flat[idx].color;
-          right.textContent = "נבחר";
-          const pct = maxIdx === 0 ? 0 : (idx / maxIdx) * 100;
-          pfill.style.width = Math.max(0, Math.min(100, pct)) + "%";
-          slider.value = String(idx);
+          const idx = flat.findIndex(x => x.label === chosen);
+          const safe = idx < 0 ? 0 : idx;
+          label.textContent = chosen;
+          label.style.color = getComputedStyle(document.documentElement).getPropertyValue(flat[safe].color?.replace("var(","").replace(")","")) || flat[safe].color;
+          // fallback: direct var color
+          label.style.color = flat[safe].color;
+          r.textContent = "נבחר";
+          slider.value = String(safe);
+          fill.style.width = (maxIdx === 0 ? 0 : (safe / maxIdx) * 100) + "%";
         }
 
         slider.addEventListener("input", () => {
-          // ברגע שמזיזים – נחשב כבחירה
           const idx = clampInt(slider.value, 0, maxIdx);
-          const chosen = indexToRankLabel(idx);
-          state.seasonal[modeKey] = chosen;
-          sync();
+          state.seasonal[modeKey] = flat[idx].label;
           recalcInvestment();
+          syncButtons();
+          sync();
         });
 
-        sliderRow.appendChild(sliderTop);
-        sliderRow.appendChild(slider);
-        sliderRow.appendChild(pbar);
+        const clear = document.createElement("button");
+        clear.className = "btn";
+        clear.type = "button";
+        clear.style.maxWidth = "260px";
+        clear.style.justifySelf = "center";
+        clear.style.marginTop = "10px";
+        clear.textContent = "נקה בחירה";
+        clear.addEventListener("click", () => {
+          state.seasonal[modeKey] = null;
+          recalcInvestment();
+          syncButtons();
+          sync();
+        });
 
-        panel.appendChild(head);
-        panel.appendChild(big);
-        panel.appendChild(sliderRow);
+        rangeWrap.appendChild(frac);
+        rangeWrap.appendChild(slider);
+        rangeWrap.appendChild(bar);
 
-        panelsHost.appendChild(panel);
+        wrap.appendChild(q);
+        wrap.appendChild(big);
+        wrap.appendChild(rangeWrap);
+        wrap.appendChild(clear);
 
-        return { panel, sync };
+        panels.appendChild(wrap);
+        return { wrap, sync };
       }
 
-      const panels = {
-        mp: buildPanel("mp", "Multiplayer"),
-        br: buildPanel("br", "Battle royal"),
-        dmz: buildPanel("dmz", "DMZ")
-      };
+      const pMP = panelFor("mp", "Multiplayer");
+      const pBR = panelFor("br", "Battle royal");
+      const pDMZ = panelFor("dmz", "DMZ");
 
-      function openPanel(modeKey){
-        panels[modeKey].panel.style.display = "grid";
+      function open(mode){
+        [pMP.wrap, pBR.wrap, pDMZ.wrap].forEach(w => w.style.display = "none");
+        const target = (mode === "mp") ? pMP : (mode === "br") ? pBR : pDMZ;
+        target.wrap.style.display = "block";
+        target.sync();
       }
 
-      function syncModeButtons(){
-        // כפתור מסומן אם נבחר דירוג במצב הזה
-        const vMP = !!state.seasonal.mp;
-        const vBR = !!state.seasonal.br;
-        const vDMZ = !!state.seasonal.dmz;
-
-        btnMP.classList.toggle("selected", vMP);
-        btnBR.classList.toggle("selected", vBR);
-        btnDMZ.classList.toggle("selected", vDMZ);
+      function syncButtons(){
+        bMP.classList.toggle("selected", !!state.seasonal.mp);
+        bBR.classList.toggle("selected", !!state.seasonal.br);
+        bDMZ.classList.toggle("selected", !!state.seasonal.dmz);
       }
 
-      function syncModeUI(modeKey){
-        panels[modeKey].sync();
-        syncModeButtons();
-      }
+      bMP.addEventListener("click", () => { open("mp"); });
+      bBR.addEventListener("click", () => { open("br"); });
+      bDMZ.addEventListener("click", () => { open("dmz"); });
 
-      btnMP.addEventListener("click", () => { openPanel("mp"); syncModeUI("mp"); });
-      btnBR.addEventListener("click", () => { openPanel("br"); syncModeUI("br"); });
-      btnDMZ.addEventListener("click", () => { openPanel("dmz"); syncModeUI("dmz"); });
+      syncButtons();
 
-      // init
-      syncModeButtons();
-      panels.mp.sync();
-      panels.br.sync();
-      panels.dmz.sync();
+      sec.appendChild(row);
+      sec.appendChild(panels);
 
-      const nav = makeNav(sec, { canNext:true, nextText:"לסיכום כמה שווה החשבון לי" });
-
+      const nav = makeNav(sec, { nextText:"לסיכום כמה שווה החשבון לי", nextEnabled:true });
       return { sec, nav };
     }
 
-    /*****************************************************************
-     * מסך סיכום
-     *****************************************************************/
-    function calcSaleValueFromInvestment(inv){
-      // בלי להציג אחוזים למשתמש. החישוב פנימי בלבד.
-      const isDiscount = (state.accountType === ACCOUNT.DISCOUNT);
-      const factor = isDiscount ? 0.35 : 0.55; // 65% פחות => נשאר 35% ; 45% פחות => נשאר 55%
+    function calcSaleValue(inv){
+      const factor = (state.accountType === ACCOUNT.DISCOUNT) ? 0.35 : 0.55;
       return inv * factor;
     }
 
     function buildSummaryStep(){
-      const sec = makeStepShell("summary", "סיכום", null, "", "");
+      const sec = makeStep("summary", "סיכום מחיר", null, "", "");
 
-      const box = document.createElement("div");
-      box.className = "numWrap";
+      const area = document.createElement("div");
+      area.className = "numArea";
 
-      const line1 = document.createElement("div");
-      line1.style.display = "flex";
-      line1.style.alignItems = "center";
-      line1.style.justifyContent = "space-between";
-      line1.style.gap = "12px";
+      const invLine = document.createElement("div");
+      invLine.style.textAlign = "center";
+      invLine.style.color = "rgba(234,242,255,.82)";
+      invLine.style.fontWeight = "1000";
+      invLine.textContent = "שווי ההשקעה";
 
-      const t1 = document.createElement("div");
-      t1.style.fontWeight = "900";
-      t1.style.color = "rgba(255,255,255,.88)";
-      t1.textContent = "שווי ההשקעה (לפי הנתונים שבחרת)";
+      const invVal = document.createElement("div");
+      invVal.className = "money";
+      invVal.style.fontSize = "44px";
+      invVal.style.color = "var(--green)";
 
-      const v1 = document.createElement("div");
-      v1.style.fontWeight = "900";
-      v1.style.fontVariantNumeric = "tabular-nums";
-      v1.style.color = "var(--good)";
-      v1.textContent = formatILS(state.investmentValue);
+      const saleLine = document.createElement("div");
+      saleLine.style.textAlign = "center";
+      saleLine.style.color = "rgba(234,242,255,.82)";
+      saleLine.style.fontWeight = "1000";
+      saleLine.style.marginTop = "10px";
+      saleLine.textContent = "שווי החשבון למכירה";
 
-      line1.appendChild(t1);
-      line1.appendChild(v1);
+      const saleVal = document.createElement("div");
+      saleVal.className = "money";
+      saleVal.style.fontSize = "54px";
+      saleVal.style.color = "var(--red)";
+      saleVal.style.textShadow = "0 0 18px rgba(255,59,92,.20), 0 0 50px rgba(255,59,92,.10)";
 
-      const divider = document.createElement("div");
-      divider.style.height = "1px";
-      divider.style.background = "var(--line)";
-      divider.style.margin = "6px 0 4px";
+      area.appendChild(invLine);
+      area.appendChild(invVal);
+      area.appendChild(saleLine);
+      area.appendChild(saleVal);
 
-      const saleWrap = document.createElement("div");
-      saleWrap.style.display = "grid";
-      saleWrap.style.gap = "8px";
+      sec.appendChild(area);
 
-      const saleTitle = document.createElement("div");
-      saleTitle.style.fontWeight = "900";
-      saleTitle.style.color = "rgba(255,255,255,.88)";
-      saleTitle.textContent = "שווי החשבון למכירה";
+      // buttons
+      const nav = document.createElement("div");
+      nav.className = "nav";
 
-      const saleValue = document.createElement("div");
-      saleValue.style.fontSize = "40px";
-      saleValue.style.fontWeight = "1000";
-      saleValue.style.letterSpacing = ".4px";
-      saleValue.style.fontVariantNumeric = "tabular-nums";
-      saleValue.style.color = "var(--danger)"; // בעמוד סופי באדום כמו שביקשת
-      saleValue.textContent = "0.00₪";
+      const myBtn = document.createElement("button");
+      myBtn.type = "button";
+      myBtn.textContent = "חשבון שלי";
 
-      // פירוט נתונים נבחרים (כמו כפתורים אבל לא לחיצים)
-      const details = document.createElement("div");
-      details.style.display = "grid";
-      details.style.gap = "8px";
-      details.style.marginTop = "10px";
+      const newBtn = document.createElement("button");
+      newBtn.type = "button";
+      newBtn.className = "primary";
+      newBtn.textContent = "חשב חשבון חדש";
 
-      function pill(label, value, colorVar){
-        const p = document.createElement("div");
-        p.style.display = "flex";
-        p.style.alignItems = "center";
-        p.style.justifyContent = "space-between";
-        p.style.gap = "12px";
-        p.style.padding = "12px 12px";
-        p.style.borderRadius = "16px";
-        p.style.border = "1px solid var(--line)";
-        p.style.background = "rgba(10,12,15,.20)";
-
-        const l = document.createElement("div");
-        l.style.fontWeight = "900";
-        l.style.color = "rgba(255,255,255,.86)";
-        l.textContent = label;
-
-        const r = document.createElement("div");
-        r.style.fontWeight = "1000";
-        r.style.fontVariantNumeric = "tabular-nums";
-        r.style.color = colorVar || "rgba(255,255,255,.92)";
-        r.textContent = String(value);
-
-        p.appendChild(l);
-        p.appendChild(r);
-        return p;
-      }
-
-      function refresh(){
-        recalcInvestment(); // מעדכן השקעה + אנימציה למעלה
-        v1.textContent = formatILS(state.investmentValue);
-
-        const sale = calcSaleValueFromInvestment(state.investmentValue);
-
-        // אנימציה אחת לסכום המכירה (לופ אחד)
-        animateSaleOnce(sale);
-
-        // פירוט
-        details.innerHTML = "";
-        details.appendChild(pill("סוג חשבון", state.accountType === ACCOUNT.DISCOUNT ? "מוזל" : "לא מוזל", "rgba(255,255,255,.92)"));
-        details.appendChild(pill("וותק (שנים)", state.years, "rgba(255,255,255,.92)"));
-
-        details.appendChild(pill("סה״כ נשקי מיטיק", state.mythicWeapons, "var(--mythic)"));
-        if (state.mythicWeapons > 0) details.appendChild(pill("מתוכם MAX", state.mythicWeaponsMax, "var(--mythic)"));
-
-        details.appendChild(pill("סה״כ נשקי לג׳נדרי", state.legendaryWeapons, "var(--legendary)"));
-        details.appendChild(pill("סה״כ נשקי אפיק", state.epicWeapons, "var(--epic)"));
-
-        details.appendChild(pill("סה״כ דמויות מיטיק", state.mythicOperators, "var(--mythic)"));
-        if (state.mythicOperators > 0) details.appendChild(pill("מתוכם MAX", state.mythicOperatorsMax, "var(--mythic)"));
-
-        details.appendChild(pill("סה״כ דמויות לג׳נדרי", state.legendaryOperators, "var(--legendary)"));
-        details.appendChild(pill("סה״כ דמויות אפיק", state.epicOperators, "var(--epic)"));
-
-        if (state.hasRareLegendaryOperators){
-          details.appendChild(pill("דמויות אגדיות נדירות", state.rareLegendaryOperators, "rgba(255,255,255,.92)"));
-        } else {
-          details.appendChild(pill("דמויות אגדיות נדירות", "אין", "rgba(255,255,255,.62)"));
-        }
-
-        details.appendChild(pill("רמת חשבון (Level)", state.accountLevel, "rgba(255,255,255,.92)"));
-
-        const seasonalCount = seasonalStepsCount();
-        details.appendChild(pill("דירוג עונתי שנבחר", seasonalCount, "rgba(255,255,255,.92)"));
-      }
-
-      // אנימציה חד-פעמית למסך הסופי (לא לולאה)
-      let saleAnim = { raf:null, from:0, to:0, start:0, dur: 420 };
-      function animateSaleOnce(target){
-        const now = performance.now();
-        const current = parseFloat((saleValue.textContent || "0").replace("₪","")) || 0;
-
-        saleAnim.from = current;
-        saleAnim.to = target;
-        saleAnim.start = now;
-        saleAnim.dur = 420;
-
-        if (saleAnim.raf) cancelAnimationFrame(saleAnim.raf);
-
-        const tick = (t) => {
-          const p = Math.min(1, (t - saleAnim.start) / saleAnim.dur);
-          const eased = 1 - Math.pow(1 - p, 3);
-          const val = saleAnim.from + (saleAnim.to - saleAnim.from) * eased;
-          saleValue.textContent = formatILS(val);
-          if (p < 1) saleAnim.raf = requestAnimationFrame(tick);
-        };
-        saleAnim.raf = requestAnimationFrame(tick);
-      }
-
-      saleWrap.appendChild(saleTitle);
-      saleWrap.appendChild(saleValue);
-      saleWrap.appendChild(details);
-
-      box.appendChild(line1);
-      box.appendChild(divider);
-      box.appendChild(saleWrap);
-
-      sec.appendChild(box);
-
-      // כפתורים למסך סופי
-      const row = document.createElement("div");
-      row.className = "navRow";
-
-      const myAcc = document.createElement("button");
-      myAcc.className = "navBtn";
-      myAcc.type = "button";
-      myAcc.textContent = "חשבון שלי";
-
-      const newCalc = document.createElement("button");
-      newCalc.className = "navBtn primary";
-      newCalc.type = "button";
-      newCalc.textContent = "חשב חשבון חדש";
-
-      myAcc.addEventListener("click", () => {
-        // כבר כאן – רק מרענן ושומר
+      myBtn.addEventListener("click", () => {
         saveToStorage();
-        refresh();
-        openModal("החשבון שלי", "הנתונים נשמרו בדפדפן. בכל כניסה תוכל לפתוח את הסיכום או לחשב מחדש.");
+        openModal("נשמר", "הנתונים נשמרו בדפדפן.\nבכניסה הבאה תוכל לפתוח סיכום או לחשב מחדש.");
       });
 
-      newCalc.addEventListener("click", () => {
-        // איפוס מלא + שמירה
+      newBtn.addEventListener("click", () => {
         resetAll();
-        saveToStorage(); // שומר גם איפוס כדי שלא יקפוץ סיכום ישן
-        // חוזרים לתחילת החישוב
         welcome.style.display = "";
         stepsHost.innerHTML = "";
         stepEls.length = 0;
-        animateMoneyTo(0);
       });
 
-      row.appendChild(myAcc);
-      row.appendChild(newCalc);
-      sec.appendChild(row);
+      nav.appendChild(myBtn);
+      nav.appendChild(newBtn);
+      sec.appendChild(nav);
 
-      // hook refresh
-      sec.refreshSummary = refresh;
+      // refresh hook
+      sec.refreshSummary = () => {
+        recalcInvestment();
+        invVal.textContent = formatILS(state.investmentValue);
+        // one-shot animation for sale
+        const target = calcSaleValue(state.investmentValue);
+        // פשוט נשתמש ב-count קצר:
+        const from = parseFloat((saleVal.textContent || "0").replace("₪","")) || 0;
+        const start = performance.now();
+        const dur = 420;
+        const tick = (t) => {
+          const p = Math.min(1, (t - start) / dur);
+          const eased = 1 - Math.pow(1 - p, 3);
+          const val = from + (target - from) * eased;
+          saleVal.textContent = formatILS(val);
+          if (p < 1) requestAnimationFrame(tick);
+        };
+        requestAnimationFrame(tick);
+      };
 
       return { sec };
     }
 
-    /*****************************************************************
-     * STORAGE
-     *****************************************************************/
-    function saveToStorage(){
-      const payload = {
-        savedAt: Date.now(),
-        state: JSON.parse(JSON.stringify(state))
-      };
-      try{
-        localStorage.setItem(STORAGE_KEY, JSON.stringify(payload));
-      }catch(_e){}
+    function buildSteps(){
+      stepsHost.innerHTML = "";
+      stepEls.length = 0;
+
+      // 0) CP
+      const cp = makeCPStep();
+      stepEls.push(cp.sec);
+      stepsHost.appendChild(cp.sec);
+
+      // 1) account type
+      const s1 = makeTwoChoiceStep({
+        stepId:"accountType",
+        questionText:"בחר סוג חשבון",
+        helpLabel:"איך אני יודע איזה סוג חשבון יש לי",
+        helpTitle:"איך מזהים סוג חשבון",
+        helpBody:"חשבון מוזל זה חשבון שנפתח בהודו או בישראל דרך VPN שמחובר להודו.\nאם אתם לא בטוחים: בחשבון מוזל פתיחות של הגרלות מתחילות ב־10 CP.\nבחשבון לא מוזל פתיחות מתחילות ב־30 CP.",
+        leftLabel:"חשבון מוזל",
+        rightLabel:"חשבון לא מוזל",
+        onPick:(which)=>{
+          state.accountType = (which === 1) ? ACCOUNT.DISCOUNT : ACCOUNT.REGULAR;
+          s1.nav.nextBtn.disabled = false;
+          recalcInvestment();
+        }
+      });
+      stepEls.push(s1.sec);
+      stepsHost.appendChild(s1.sec);
+
+      // 2) years
+      const s2 = makeNumberStep({
+        stepId:"years",
+        questionText:"מה וותק החשבון",
+        helpLabel:null, helpTitle:"", helpBody:"",
+        rarityClass:null,
+        unitLabel:"שנים",
+        min:0, max:LIMITS.yearsMax,
+        getValue:()=>state.years,
+        setValue:(v)=>{ state.years=v; },
+        onChange:()=>recalcInvestment()
+      });
+      stepEls.push(s2.sec); stepsHost.appendChild(s2.sec);
+
+      // 3) mythic weapons
+      const s3 = makeNumberStep({
+        stepId:"mythicWeapons",
+        questionText:"כמה נשקים מיטיק קיימים בחשבון",
+        helpLabel:"מה זה מיטיק",
+        helpTitle:"מה זה מיטיק",
+        helpBody:"מיטיק זה נשק/דמות שאפשר לשדרג.\nבמשחק זה בדרך כלל מופיע בקטגוריה אדומה.",
+        rarityClass:"mythic",
+        unitLabel:"נשקים",
+        min:0, max:LIMITS.mythicWeaponsMax,
+        getValue:()=>state.mythicWeapons,
+        setValue:(v)=>{ state.mythicWeapons=v; state.mythicWeaponsMax=Math.min(state.mythicWeaponsMax,v); },
+        onChange:()=>recalcInvestment()
+      });
+      stepEls.push(s3.sec); stepsHost.appendChild(s3.sec);
+
+      // 4) mythic weapons MAX
+      const s4 = makeNumberStep({
+        stepId:"mythicWeaponsMax",
+        questionText:"כמה מתוכם ברמת מקסימום",
+        helpLabel:"מה זה מקסימום",
+        helpTitle:"מה זה מקסימום (MAX)",
+        helpBody:"מקסימום (MAX) זה אומר נשק או דמות מיטיק ששודרגה לרמה המקסימלית.\nלא חצי מקסימום.",
+        rarityClass:"mythic",
+        unitLabel:"MAX",
+        min:0, max:LIMITS.mythicWeaponsMax,
+        getValue:()=>state.mythicWeaponsMax,
+        setValue:(v)=>{ state.mythicWeaponsMax=v; },
+        onChange:()=>recalcInvestment()
+      });
+      stepEls.push(s4.sec); stepsHost.appendChild(s4.sec);
+
+      // 5) legendary weapons
+      const s5 = makeNumberStep({
+        stepId:"legendaryWeapons",
+        questionText:"כמה נשקי לג׳נדרי קיימים בחשבון",
+        helpLabel:null, helpTitle:"", helpBody:"",
+        rarityClass:"legendary",
+        unitLabel:"נשקים",
+        min:0, max:LIMITS.legendaryWeaponsMax,
+        getValue:()=>state.legendaryWeapons,
+        setValue:(v)=>{ state.legendaryWeapons=v; },
+        onChange:()=>recalcInvestment()
+      });
+      stepEls.push(s5.sec); stepsHost.appendChild(s5.sec);
+
+      // 6) epic weapons
+      const s6 = makeNumberStep({
+        stepId:"epicWeapons",
+        questionText:"כמה נשקי אפיק (Epic) קיימים בחשבון",
+        helpLabel:null, helpTitle:"", helpBody:"",
+        rarityClass:"epic",
+        unitLabel:"נשקים",
+        min:0, max:LIMITS.epicWeaponsMax,
+        getValue:()=>state.epicWeapons,
+        setValue:(v)=>{ state.epicWeapons=v; },
+        onChange:()=>recalcInvestment()
+      });
+      stepEls.push(s6.sec); stepsHost.appendChild(s6.sec);
+
+      // ממשיכים בחלק 2…
+      showStep(0);
+      recalcInvestment();
     }
 
-    function loadFromStorage(){
-      try{
-        const raw = localStorage.getItem(STORAGE_KEY);
-        if (!raw) return null;
-        return JSON.parse(raw);
-      }catch(_e){
-        return null;
-      }
-    }
+    startBtn.addEventListener("click", () => {
+      welcome.style.display = "none";
+      buildSteps();
+    });
 
-    function resetAll(){
-      state.accountType = null;
-      state.years = 0;
-      state.mythicWeapons = 0;
-      state.mythicWeaponsMax = 0;
-      state.legendaryWeapons = 0;
-      state.epicWeapons = 0;
-
-      state.mythicOperators = 0;
-      state.mythicOperatorsMax = 0;
-      state.legendaryOperators = 0;
-      state.epicOperators = 0;
-
-      state.hasRareLegendaryOperators = false;
-      state.rareLegendaryOperators = 0;
-
-      state.accountLevel = 0;
-
-      state.seasonal.mp = null;
-      state.seasonal.br = null;
-      state.seasonal.dmz = null;
-
-      state.investmentValue = 0;
-    }
-
-    function showResumePromptIfAny(){
+    // הצעה לפתיחה מהדפדפן
+    (function resumePrompt(){
       const saved = loadFromStorage();
       if (!saved || !saved.state) return;
+      if (!saved.state.accountType && (!saved.state.cpAmount || saved.state.cpAmount === 0)) return;
 
-      // אם יש חישוב (כלומר סוג חשבון נשמר) => להציע
-      const hadCalc = !!saved.state.accountType;
-      if (!hadCalc) return;
-
-      openModal(
-        "חישוב שמור נמצא",
-        "נראה שכבר חישבת בעבר.\nרוצה לפתוח את הסיכום של החשבון שלך או לחשב חשבון חדש?"
-      );
-
-      // נוסיף כפתורים בתוך המודל באופן נקי (בלי להוסיף מסגרות חיצוניות)
+      openModal("מצאתי חישוב שמור", "רוצה להמשיך לחשבון האחרון שלך או להתחיל חדש?");
       const actions = document.createElement("div");
       actions.style.display = "grid";
       actions.style.gridTemplateColumns = "1fr 1fr";
@@ -1704,390 +1496,267 @@
       actions.style.marginTop = "12px";
 
       const goMy = document.createElement("button");
-      goMy.className = "navBtn primary";
-      goMy.type = "button";
-      goMy.textContent = "פתח חשבון שלי";
+      goMy.className = "btn";
+      goMy.textContent = "המשך לחשבון שלי";
 
       const goNew = document.createElement("button");
-      goNew.className = "navBtn";
-      goNew.type = "button";
+      goNew.className = "btn";
+      goNew.style.background = "rgba(255,255,255,.06)";
       goNew.textContent = "חשב חדש";
 
       actions.appendChild(goMy);
       actions.appendChild(goNew);
-
-      // נשתיל פעולות לתוך גוף המודל
-      modalBody.appendChild(actions);
+      mBody.appendChild(actions);
 
       goMy.addEventListener("click", () => {
-        // משחזרים state
         Object.assign(state, saved.state);
         closeModal();
-        // פותחים wizard ישירות ומביאים לסיכום
         welcome.style.display = "none";
-        buildSteps(); // יבנה את כל השלבים כולל סיכום
-        recalcInvestment();
-        const sumIdx = findStepIndex("summary");
-        if (sumIdx !== -1){
-          const sumEl = stepEls[sumIdx];
-          if (sumEl && sumEl.refreshSummary) sumEl.refreshSummary();
-          showStep(sumIdx);
-        }
+        buildSteps();
+        // נתקדם לסיכום בסוף חלק 2 (אחרי שיבנה)
       });
 
       goNew.addEventListener("click", () => {
         resetAll();
-        saveToStorage();
         closeModal();
       });
+    })();
+
+    // init
+    animateMoneyTo(0);
+
+    /* ======= לא לסגור script פה. ממשיכים בחלק 2 ======= */
+
+        /*****************************************************************
+     * PART 2 CONTINUE (בלי לפתוח <script> מחדש)
+     *****************************************************************/
+
+     function makeYesNoStep({
+      stepId, questionText,
+      helpLabel, helpTitle, helpBody,
+      getBool, setBool
+    }){
+      const sec = makeStep(stepId, questionText, helpLabel, helpTitle, helpBody);
+
+      const grid = document.createElement("div");
+      grid.className = "choices2";
+      grid.style.maxWidth = "420px";
+
+      const yes = document.createElement("button");
+      yes.className = "chip";
+      yes.type = "button";
+      yes.textContent = "כן";
+
+      const no = document.createElement("button");
+      no.className = "chip";
+      no.type = "button";
+      no.textContent = "לא";
+
+      function sync(){
+        const v = !!getBool();
+        yes.classList.toggle("selected", v === true);
+        no.classList.toggle("selected", v === false);
+      }
+
+      yes.addEventListener("click", () => { setBool(true); sync(); recalcInvestment(); });
+      no.addEventListener("click", () => { setBool(false); sync(); recalcInvestment(); });
+
+      grid.appendChild(yes); grid.appendChild(no);
+      sec.appendChild(grid);
+
+      const nav = makeNav(sec, { nextEnabled:true });
+      sync();
+      return { sec, nav };
     }
 
-    /*****************************************************************
-     * OVERRIDE buildSteps: מוסיפים את כל השלבים ואז סיכום
-     *****************************************************************/
-    const buildStepsOriginal = buildSteps;
+    function buildStepsContinue(){
+      // מוסיף את ההמשך אחרי epicWeapons (שלב 6)
+      // מניח ש-buildSteps כבר רץ ובנה עד epicWeapons
+      // נבנה בהמשך ה-steps באותו host
 
-    buildSteps = function(){
-      stepsHost.innerHTML = "";
-      stepEls.length = 0;
-
-      // 1) סוג חשבון
-      const s1 = makeTwoChoice(
-        "accountType",
-        "בחר סוג חשבון",
-        "איך אני יודע איזה סוג חשבון יש לי",
-        "איך מזהים סוג חשבון",
-        "חשבון מוזל זה חשבון שנפתח בהודו או בישראל דרך VPN שמחובר להודו.\nאם אתם לא בטוחים: בחשבון מוזל פתיחות של הגרלות מתחילות ב־10 CP.\nבחשבון לא מוזל פתיחות מתחילות ב־30 CP.",
-        "חשבון מוזל",
-        "חשבון לא מוזל",
-        (which) => {
-          state.accountType = (which === 1) ? ACCOUNT.DISCOUNT : ACCOUNT.REGULAR;
-          recalcInvestment();
-          s1.nav.nextBtn.disabled = false;
-          saveToStorage();
-        }
-      );
-      stepEls.push(s1.sec);
-      stepsHost.appendChild(s1.sec);
-
-      // 2) וותק
-      const s2 = makeNumberStep({
-        stepId: "years",
-        title: "מה וותק החשבון",
-        helpLabel: null,
-        helpTitle: "",
-        helpBody: "",
-        rarityClass: null,
-        unitLabel: "שנים",
-        min: 0,
-        max: LIMITS.yearsMax, // שינוי מגבלה כאן
-        getValue: () => state.years,
-        setValue: (v) => { state.years = v; },
-        onChange: () => { recalcInvestment(); saveToStorage(); }
-      });
-      stepEls.push(s2.sec);
-      stepsHost.appendChild(s2.sec);
-
-      // 3) נשקי מיטיק
-      const s3 = makeNumberStep({
-        stepId: "mythicWeapons",
-        title: "כמה נשקים מיטיק קיימים בחשבון",
-        helpLabel: "מה זה מיטיק",
-        helpTitle: "מה זה מיטיק",
-        helpBody: "מיטיק זה נשק/דמות שמופיעים בקטגוריה האדומה.\nמיטיק זה כל דבר שאפשר לשדרג.\nלדוגמה: נשק מיטיק אחרי קניה אפשר לשדרג בתשלום.\nדמות מיטיק גם יכולה להיות משודרגת.",
-        rarityClass: "rar-mythic",
-        unitLabel: "נשקים",
-        min: 0,
-        max: LIMITS.mythicWeaponsMax, // שינוי כאן אם תרצה
-        getValue: () => state.mythicWeapons,
-        setValue: (v) => {
-          state.mythicWeapons = v;
-          state.mythicWeaponsMax = Math.min(state.mythicWeaponsMax, v);
-        },
-        onChange: () => { recalcInvestment(); saveToStorage(); }
-      });
-      stepEls.push(s3.sec);
-      stepsHost.appendChild(s3.sec);
-
-      // 4) מתוכם MAX (מותנה)
-      const s4 = makeNumberStep({
-        stepId: "mythicWeaponsMax",
-        title: "כמה מתוכם ברמת מקסימום",
-        helpLabel: "מה זה מקסימום",
-        helpTitle: "מה זה מקסימום (MAX)",
-        helpBody: "מקסימום (MAX) זה אומר נשק או דמות מיטיק ששודרגה לרמה המקסימלית.\nלא חצי מקסימום.",
-        rarityClass: "rar-mythic",
-        unitLabel: "MAX",
-        min: 0,
-        max: LIMITS.mythicWeaponsMax,
-        getValue: () => state.mythicWeaponsMax,
-        setValue: (v) => { state.mythicWeaponsMax = v; },
-        onChange: () => { recalcInvestment(); saveToStorage(); }
-      });
-      stepEls.push(s4.sec);
-      stepsHost.appendChild(s4.sec);
-
-      // 5) לג'נדרי נשקים
-      const s5 = makeNumberStep({
-        stepId: "legendaryWeapons",
-        title: "כמה נשקי לג׳נדרי קיימים בחשבון",
-        helpLabel: null,
-        helpTitle: "",
-        helpBody: "",
-        rarityClass: "rar-legendary",
-        unitLabel: "נשקים",
-        min: 0,
-        max: LIMITS.legendaryWeaponsMax,
-        getValue: () => state.legendaryWeapons,
-        setValue: (v) => { state.legendaryWeapons = v; },
-        onChange: () => { recalcInvestment(); saveToStorage(); }
-      });
-      stepEls.push(s5.sec);
-      stepsHost.appendChild(s5.sec);
-
-      // 6) אפיק נשקים
-      const s6 = makeNumberStep({
-        stepId: "epicWeapons",
-        title: "כמה נשקי אפיק (Epic) קיימים בחשבון",
-        helpLabel: null,
-        helpTitle: "",
-        helpBody: "",
-        rarityClass: "rar-epic",
-        unitLabel: "נשקים",
-        min: 0,
-        max: LIMITS.epicWeaponsMax,
-        getValue: () => state.epicWeapons,
-        setValue: (v) => { state.epicWeapons = v; },
-        onChange: () => { recalcInvestment(); saveToStorage(); }
-      });
-      stepEls.push(s6.sec);
-      stepsHost.appendChild(s6.sec);
-
-      // 7) דמויות מיטיק
+      // 7) mythic operators
       const s7 = makeNumberStep({
-        stepId: "mythicOperators",
-        title: "כמה דמויות מיטיק קיימים בחשבון",
-        helpLabel: "מה זה מיטיק",
-        helpTitle: "מה זה מיטיק",
-        helpBody: "מיטיק זה נשק/דמות שאפשר לשדרג.\nבמשחק זה בדרך כלל מופיע בקטגוריה אדומה.",
-        rarityClass: "rar-mythic",
-        unitLabel: "דמויות",
-        min: 0,
-        max: LIMITS.mythicOperatorsMax, // שינוי כאן אם תרצה
-        getValue: () => state.mythicOperators,
-        setValue: (v) => {
-          state.mythicOperators = v;
-          state.mythicOperatorsMax = Math.min(state.mythicOperatorsMax, v);
-        },
-        onChange: () => { recalcInvestment(); saveToStorage(); }
+        stepId:"mythicOperators",
+        questionText:"כמה דמויות מיטיק קיימים בחשבון",
+        helpLabel:"מה זה מיטיק",
+        helpTitle:"מה זה מיטיק",
+        helpBody:"מיטיק זה דמות שאפשר לשדרג.\nבמשחק זה בדרך כלל מופיע בקטגוריה אדומה.",
+        rarityClass:"mythic",
+        unitLabel:"דמויות",
+        min:0, max:LIMITS.mythicOperatorsMax,
+        getValue:()=>state.mythicOperators,
+        setValue:(v)=>{ state.mythicOperators=v; state.mythicOperatorsMax=Math.min(state.mythicOperatorsMax,v); },
+        onChange:()=>recalcInvestment()
       });
-      stepEls.push(s7.sec);
-      stepsHost.appendChild(s7.sec);
+      stepEls.push(s7.sec); stepsHost.appendChild(s7.sec);
 
-      // 8) מתוכם MAX (מותנה)
+      // 8) mythic operators MAX
       const s8 = makeNumberStep({
-        stepId: "mythicOperatorsMax",
-        title: "כמה מהם ברמת מקסימום",
-        helpLabel: "מה זה מקסימום",
-        helpTitle: "מה זה מקסימום (MAX)",
-        helpBody: "מקסימום (MAX) זה אומר דמות מיטיק ששודרגה לרמה המקסימלית.\nלא חצי מקסימום.",
-        rarityClass: "rar-mythic",
-        unitLabel: "MAX",
-        min: 0,
-        max: LIMITS.mythicOperatorsMax, // בפועל נחתוך לפי הכמות
-        getValue: () => state.mythicOperatorsMax,
-        setValue: (v) => { state.mythicOperatorsMax = v; },
-        onChange: () => { recalcInvestment(); saveToStorage(); }
+        stepId:"mythicOperatorsMax",
+        questionText:"כמה מהם ברמת מקסימום",
+        helpLabel:"מה זה מקסימום",
+        helpTitle:"מה זה מקסימום (MAX)",
+        helpBody:"מקסימום (MAX) זה אומר דמות מיטיק ששודרגה לרמה המקסימלית.\nלא חצי מקסימום.",
+        rarityClass:"mythic",
+        unitLabel:"MAX",
+        min:0, max:LIMITS.mythicOperatorsMax,
+        getValue:()=>state.mythicOperatorsMax,
+        setValue:(v)=>{ state.mythicOperatorsMax=v; },
+        onChange:()=>recalcInvestment()
       });
-      stepEls.push(s8.sec);
-      stepsHost.appendChild(s8.sec);
+      stepEls.push(s8.sec); stepsHost.appendChild(s8.sec);
 
-      // 9) דמויות לג'נדרי
+      // 9) legendary operators
       const s9 = makeNumberStep({
-        stepId: "legendaryOperators",
-        title: "כמה דמויות לג׳נדרי קיימים בחשבון",
-        helpLabel: null,
-        helpTitle: "",
-        helpBody: "",
-        rarityClass: "rar-legendary",
-        unitLabel: "דמויות",
-        min: 0,
-        max: LIMITS.legendaryOperatorsMax,
-        getValue: () => state.legendaryOperators,
-        setValue: (v) => { state.legendaryOperators = v; },
-        onChange: () => { recalcInvestment(); saveToStorage(); }
+        stepId:"legendaryOperators",
+        questionText:"כמה דמויות לג׳נדרי קיימים בחשבון",
+        helpLabel:null, helpTitle:"", helpBody:"",
+        rarityClass:"legendary",
+        unitLabel:"דמויות",
+        min:0, max:LIMITS.legendaryOperatorsMax,
+        getValue:()=>state.legendaryOperators,
+        setValue:(v)=>{ state.legendaryOperators=v; },
+        onChange:()=>recalcInvestment()
       });
-      stepEls.push(s9.sec);
-      stepsHost.appendChild(s9.sec);
+      stepEls.push(s9.sec); stepsHost.appendChild(s9.sec);
 
-      // 10) דמויות אפיק
+      // 10) epic operators
       const s10 = makeNumberStep({
-        stepId: "epicOperators",
-        title: "כמה דמויות אפיק (Epic) קיימים בחשבון",
-        helpLabel: null,
-        helpTitle: "",
-        helpBody: "",
-        rarityClass: "rar-epic",
-        unitLabel: "דמויות",
-        min: 0,
-        max: LIMITS.epicOperatorsMax,
-        getValue: () => state.epicOperators,
-        setValue: (v) => { state.epicOperators = v; },
-        onChange: () => { recalcInvestment(); saveToStorage(); }
+        stepId:"epicOperators",
+        questionText:"כמה דמויות אפיק (Epic) קיימים בחשבון",
+        helpLabel:null, helpTitle:"", helpBody:"",
+        rarityClass:"epic",
+        unitLabel:"דמויות",
+        min:0, max:LIMITS.epicOperatorsMax,
+        getValue:()=>state.epicOperators,
+        setValue:(v)=>{ state.epicOperators=v; },
+        onChange:()=>recalcInvestment()
       });
-      stepEls.push(s10.sec);
-      stepsHost.appendChild(s10.sec);
+      stepEls.push(s10.sec); stepsHost.appendChild(s10.sec);
 
-      // 11) האם יש דמויות אגדיות נדירות
+      // 11) rare legendary operators yes/no
       const s11 = makeYesNoStep({
-        stepId: "hasRareLegendaryOperators",
-        title: "האם קיימים דמויות אגדיות נדירות בחשבון",
-        helpLabel: null,
-        helpTitle: "",
-        helpBody: "",
-        getValueBool: () => state.hasRareLegendaryOperators,
-        setValueBool: (v) => { state.hasRareLegendaryOperators = v; }
+        stepId:"hasRareLegendaryOperators",
+        questionText:"האם קיימים דמויות אגדיות נדירות בחשבון",
+        helpLabel:null, helpTitle:"", helpBody:"",
+        getBool:()=>state.hasRareLegendaryOperators,
+        setBool:(v)=>{ state.hasRareLegendaryOperators=v; if(!v) state.rareLegendaryOperators=0; }
       });
-      stepEls.push(s11.sec);
-      stepsHost.appendChild(s11.sec);
+      stepEls.push(s11.sec); stepsHost.appendChild(s11.sec);
 
-      // 12) כמה (מותנה)
+      // 12) rare count
       const s12 = makeNumberStep({
-        stepId: "rareLegendaryOperators",
-        title: "כמה דמויות אגדיות נדירות קיימים בחשבון",
-        helpLabel: null,
-        helpTitle: "",
-        helpBody: "",
-        rarityClass: null,
-        unitLabel: "דמויות",
-        min: 0,
-        max: LIMITS.rareLegendaryOperatorsMax, // שינוי כאן אם תרצה
-        getValue: () => state.rareLegendaryOperators,
-        setValue: (v) => { state.rareLegendaryOperators = v; },
-        onChange: () => { recalcInvestment(); saveToStorage(); }
+        stepId:"rareLegendaryOperators",
+        questionText:"כמה דמויות אגדיות נדירות קיימים בחשבון",
+        helpLabel:null, helpTitle:"", helpBody:"",
+        rarityClass:null,
+        unitLabel:"דמויות",
+        min:0, max:LIMITS.rareLegendaryOperatorsMax,
+        getValue:()=>state.rareLegendaryOperators,
+        setValue:(v)=>{ state.rareLegendaryOperators=v; },
+        onChange:()=>recalcInvestment()
       });
-      stepEls.push(s12.sec);
-      stepsHost.appendChild(s12.sec);
+      stepEls.push(s12.sec); stepsHost.appendChild(s12.sec);
 
-      // 13) רמת חשבון (Level)
+      // 13) account level
       const s13 = makeNumberStep({
-        stepId: "accountLevel",
-        title: "מה רמת החשבון",
-        helpLabel: "מה זה רמת חשבון",
-        helpTitle: "מה זה רמת חשבון",
-        helpBody: "רמת חשבון הוא ה־Level בו החשבון שלכם.\nזה לא הדירוג העונתי.\nמקסימום הרמה הוא Level 400.",
-        rarityClass: null,
-        unitLabel: "Level",
-        min: 0,
-        max: LIMITS.accountLevelMax, // שינוי כאן אם תרצה
-        getValue: () => state.accountLevel,
-        setValue: (v) => { state.accountLevel = v; },
-        onChange: () => { recalcInvestment(); saveToStorage(); }
+        stepId:"accountLevel",
+        questionText:"מה רמת החשבון",
+        helpLabel:"מה זה רמת חשבון",
+        helpTitle:"מה זה רמת חשבון",
+        helpBody:"רמת חשבון הוא ה־Level בו החשבון שלכם.\nזה לא הדירוג העונתי.\nמקסימום הרמה הוא Level 400.",
+        rarityClass:null,
+        unitLabel:"Level",
+        min:0, max:LIMITS.accountLevelMax,
+        getValue:()=>state.accountLevel,
+        setValue:(v)=>{ state.accountLevel=v; },
+        onChange:()=>recalcInvestment()
       });
-      stepEls.push(s13.sec);
-      stepsHost.appendChild(s13.sec);
+      stepEls.push(s13.sec); stepsHost.appendChild(s13.sec);
 
-      // 14) דירוג עונתי (3 מצבים)
+      // 14) seasonal rank
       const s14 = makeSeasonalRankStep();
-      stepEls.push(s14.sec);
-      stepsHost.appendChild(s14.sec);
+      stepEls.push(s14.sec); stepsHost.appendChild(s14.sec);
 
-      // 15) סיכום
+      // 15) summary
       const sum = buildSummaryStep();
-      stepEls.push(sum.sec);
-      stepsHost.appendChild(sum.sec);
+      stepEls.push(sum.sec); stepsHost.appendChild(sum.sec);
+    }
 
-      // מצבים התחלתיים
-      showStep(0);
+    // מוסיפים את ההמשך אחרי buildSteps הראשוני
+    const buildStepsBase = buildSteps;
+    buildSteps = function(){
+      buildStepsBase();
+      buildStepsContinue();
+      // אם הגענו מריסטור – ננסה לקפוץ לסיכום אם רצו
+      recalcInvestment();
     };
 
-    /*****************************************************************
-     * OVERRIDE NEXT/PREV: מוסיפים דילוגים מותנים נוספים
-     *****************************************************************/
-    const nextStepOriginal = nextStep;
+    // עדכון של next/prev כדי לדלג על שלבים מותנים
+    const _next = nextStep;
     nextStep = function(){
       const id = stepEls[currentStepIndex]?.dataset?.stepId;
 
-      // דילוג: אם אין נשקי מיטיק -> דלג על "mythicWeaponsMax"
       if (id === "mythicWeapons" && state.mythicWeapons <= 0){
         const idx = findStepIndex("mythicWeaponsMax");
         if (idx !== -1) return showStep(idx + 1);
       }
-
-      // דילוג: אם אין דמויות מיטיק -> דלג על "mythicOperatorsMax"
       if (id === "mythicOperators" && state.mythicOperators <= 0){
         const idx = findStepIndex("mythicOperatorsMax");
         if (idx !== -1) return showStep(idx + 1);
       }
-
-      // דילוג: אם אין נדירות -> דלג על כמות
       if (id === "hasRareLegendaryOperators" && !state.hasRareLegendaryOperators){
         const idx = findStepIndex("rareLegendaryOperators");
         if (idx !== -1) return showStep(idx + 1);
       }
-
-      // אם הגענו לסיכום דרך הכפתור "לסיכום..."
       if (id === "seasonalRank"){
         const sumIdx = findStepIndex("summary");
         if (sumIdx !== -1){
-          // שמירה, רענון סיכום
-          saveToStorage();
           const sumEl = stepEls[sumIdx];
           if (sumEl && sumEl.refreshSummary) sumEl.refreshSummary();
           return showStep(sumIdx);
         }
       }
-
-      showStep(Math.min(stepEls.length - 1, currentStepIndex + 1));
+      _next();
     };
 
-    const prevStepOriginal = prevStep;
+    const _prev = prevStep;
     prevStep = function(){
       const id = stepEls[currentStepIndex]?.dataset?.stepId;
 
-      // חזרה מותנית: אם דילגנו על mythicWeaponsMax
       if (id === "legendaryWeapons" && state.mythicWeapons <= 0){
         const mythIdx = findStepIndex("mythicWeapons");
         if (mythIdx !== -1) return showStep(mythIdx);
       }
-
-      // חזרה מותנית: אם דילגנו על mythicOperatorsMax
       if (id === "legendaryOperators" && state.mythicOperators <= 0){
         const mythOpIdx = findStepIndex("mythicOperators");
         if (mythOpIdx !== -1) return showStep(mythOpIdx);
       }
-
-      // חזרה מותנית: אם דילגנו על rareLegendaryOperators
       if (id === "accountLevel" && !state.hasRareLegendaryOperators){
         const ynIdx = findStepIndex("hasRareLegendaryOperators");
         if (ynIdx !== -1) return showStep(ynIdx);
       }
-
-      showStep(Math.max(0, currentStepIndex - 1));
+      _prev();
     };
 
-    /*****************************************************************
-     * START BUTTON: אחרי בנייה – בדיקת שמירה
-     *****************************************************************/
-    const startBtnOriginal = startBtn.onclick;
-    startBtn.addEventListener("click", () => {
-      // buildSteps נקרא כבר בחלק 1
-      // כאן רק נוודא שהחישוב מלא
-      recalcInvestment();
-      saveToStorage();
-    });
+    // אם המשתמש בחר “המשך לחשבון שלי” מהמודאל של חלק 1
+    // אחרי הבנייה המלאה – ננסה להביא אותו לסיכום אוטומטית אם יש נתונים
+    setTimeout(() => {
+      const saved = loadFromStorage();
+      if (!saved || !saved.state) return;
+      const hasAny = !!saved.state.accountType || (saved.state.cpAmount && saved.state.cpAmount !== 0);
+      if (!hasAny) return;
 
-    // בטעינה ראשונה של האתר: להציע "חשבון שלי" אם קיים חישוב שמור
-    // (בלי להפריע – רק מודאל קל)
-    setTimeout(showResumePromptIfAny, 250);
+      // אם כבר התחילו (welcome מוסתר) אז נוכל לקפוץ
+      if (welcome.style.display === "none"){
+        const sumIdx = findStepIndex("summary");
+        if (sumIdx !== -1){
+          const sumEl = stepEls[sumIdx];
+          if (sumEl && sumEl.refreshSummary) sumEl.refreshSummary();
+        }
+      }
+    }, 200);
 
-    /*****************************************************************
-     * QUALITY NOTES (בקוד בלבד):
-     * - כל הערכים לשינוי נמצאים ב-PRICING ו-LIMITS למעלה.
-     * - דירוג עונתי: כל מוד שנבחר בו דירוג מוסיף 1₪.
-     * - כל שינוי ערך מפעיל אנימציית סכום למעלה בזמן אמת.
-     *****************************************************************/
   </script>
-
 </body>
 </html>
