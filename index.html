@@ -331,8 +331,8 @@
 
     /* CP coin tiny icon */
     .coin{
-      width:28px;
-      height:28px;
+      width:44px;
+      height:44px;
       object-fit:contain;
       margin-inline:6px;
       transform: translateY(2px);
@@ -969,7 +969,22 @@
 
       const unit = document.createElement("div");
       unit.className = "unit";
-      unit.innerHTML = `CP <img class="coin" alt="" src="https://i.postimg.cc/15X8dgj9/Cp-nqy.png">`;
+      unit.innerHTML = `
+CP 
+<img 
+  alt="CP" 
+  src="https://i.postimg.cc/15X8dgj9/Cp-nqy.png"
+  style="
+    width:38px;
+    height:38px;
+    object-fit:contain;
+    display:inline-block;
+    vertical-align:middle;
+    margin-inline:6px;
+  "
+>
+`;
+
 
       big.appendChild(n);
       big.appendChild(unit);
